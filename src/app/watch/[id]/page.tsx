@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
-import { Player } from "@/components/Player";
+import { WatchView } from "@/components/WatchView";
 import { formatTime } from "@/lib/format";
-import { getLecture } from "@/lib/lectures";
+import { getLecture, getSegments } from "@/lib/lectures";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -26,10 +26,19 @@ export default async function WatchPage({ params, searchParams }: Props) {
   if (!lecture) notFound();
 
   const startAt = Math.max(0, Number(t) || 0);
+  const segments = lecture.status === "ready" ? await getSegments(lecture.id) : [];
 
   return (
     <article className="mt-4">
-      <Player publicId={lecture.publicId} startAt={startAt} searchable={lecture.status === "ready"} />
+      <WatchView
+        lectureId={lecture.id}
+        publicId={lecture.publicId}
+        title={lecture.title}
+        durationS={lecture.durationS}
+        startAt={startAt}
+        searchable={lecture.status === "ready"}
+        segments={segments}
+      />
       <header className="mt-5">
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{lecture.title}</h1>
         <p className="mt-1 text-muted">
