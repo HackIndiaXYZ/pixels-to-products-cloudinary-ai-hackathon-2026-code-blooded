@@ -47,3 +47,16 @@ Every model in the chain failing (error, timeout, 503, or schema-invalid JSON) �
 | Fallback rate | 0 | _fill in Phase 09_ |
 
 Honest limit: 10 questions is a smoke test, not a benchmark. It's enough to catch a broken prompt or retrieval regression before the demo, and the numbers go in the README.
+
+## Study Packs (Phase 13)
+
+| Stage | Detail |
+|---|---|
+| **Input** | All of one session's segments as `<excerpt id="S…" at="mm:ss" chapter="…">` |
+| **Model** | Same Gemini chain via `generateJson(RawStudyPack)`, 25 s per attempt |
+| **Output** | `{ summary[3], concepts[{name, segment_id}], quiz[{question, options[4], correct_index, explanation, segment_id}], highlight_segment_ids[≤5] }` |
+| **Validation** (`validateStudyPack`, unit-tested) | Drop anything whose `segment_id` isn't in the session; drop questions without exactly 4 options or with an out-of-range answer; fewer than 3 valid questions → no quiz; highlights deduplicated, time-ordered, ≤5 |
+| **When** | Automatically after ingest (`after()`), or on demand from the Studio |
+| **Failure** | Logged (`study_pack.failed`); the Watch page simply has no Study tab (NFR4) |
+
+**First real run (Oct 1, two sessions):** both packs had 3 accurate bullets, 5 concepts mapped to the right second, 5 grounded questions each (e.g. "Which regularization method pushes weights exactly to zero?" → L1, explained at 0:39), and highlights spread across every chapter. Served by `gemini-3.1-flash-lite` after the first model in the chain failed, which shows the fallback chain working in production conditions.

@@ -1,5 +1,7 @@
 # Phase 13 — Study Packs & "Session in 60 Seconds"
 
+**Status: DONE (Oct 1)** · branch `feature/study-packs-insights` · verified on the real library (see `AI_EVALUATION.md` → Study Packs)
+
 ## Objective
 Every session gets a **Study Pack**, generated automatically once transcription completes:
 - a 3-bullet summary

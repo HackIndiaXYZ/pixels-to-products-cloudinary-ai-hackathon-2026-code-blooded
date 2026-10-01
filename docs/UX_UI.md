@@ -49,3 +49,19 @@ Bottom sheet (mobile) / modal (desktop). Phone-shaped 9:16 frame playing the Mom
 ## Loading & Error
 
 Skeletons, never bare spinners. 404 session → "This session isn't available." Every error has a next action.
+
+## v3 additions
+
+### Watch → Study tab (default when a Study Pack exists)
+- **Session in N seconds**: AI-picked highlights stitched into one reel
+- **In short**: 3 summary bullets
+- **Key concepts**: chips that seek the player to where each is explained
+- **Check yourself**: 5-question quiz with instant right/wrong feedback, a running score, and **▶ Watch the explanation** jumping to the exact moment
+
+### Search → Answer card
+- **Watch the answer**: when an answer cites 2+ moments, one stitched Answer Reel, each clip labelled with its speaker
+
+### Studio
+- **Sessions | Insights** tabs
+- Per ready session: **Build Study Pack** (shows *Building… → Study Pack ready ✓*)
+- **Insights**: totals (questions asked, % answered from the library, Moments shared), **Knowledge gaps** (record these next), **Most asked**, **Moments that travel**

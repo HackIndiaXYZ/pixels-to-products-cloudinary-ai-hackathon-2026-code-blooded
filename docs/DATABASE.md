@@ -73,3 +73,14 @@ Cloudinary's `.transcript` lines vary from one word to a paragraph. The webhook 
 ## Privacy
 
 Transcripts can identify people. Logs reference `lectureId`, never transcript text. IPs are stored only as salted hashes.
+
+## v3 additions
+
+| Migration | Adds |
+|---|---|
+| `002_segment_words.sql` | `segments.words JSONB` (word timings → exactly-timed Moment captions), `lectures.language` |
+| `003_study_packs_insights.sql` | `study_packs` (one validated pack per session), `ask_log` (question text + outcome, **no identity**), `moment_events` (anonymous open/share counts) |
+
+Applied with `pnpm db:migrate` (tracked in `schema_migrations`, each file once, in a transaction).
+
+**Insights queries** group questions case- and whitespace-insensitively (`lower(regexp_replace(trim(q), '\s+', ' '))`) over the last 30 days. **Privacy:** `ask_log` stores the question only, never IP or user; `moment_events` stores segment and kind only.

@@ -1,5 +1,7 @@
 # Phase 14 — Learner Insights & Knowledge Gaps
 
+**Status: DONE (Oct 1)** · branch `feature/study-packs-insights`
+
 ## Objective
 Give organizers the startup-grade feedback loop: **what learners ask, what the library can't answer yet, and which moments travel.**
 - **Knowledge gaps:** questions that came back `not_found`, grouped, so the organizer knows **what to record next**

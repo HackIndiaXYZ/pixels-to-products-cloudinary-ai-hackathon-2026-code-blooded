@@ -74,3 +74,25 @@ JSON in, JSON out. Errors: `{ "error": { "code": string, "message": string } }`.
 ---
 
 Every endpoint maps to an FR in `PRD.md`; there is no endpoint without one.
+
+---
+
+## v3 endpoints
+
+### `POST /api/lectures/:id/study-pack`
+- **Auth:** organizer · `maxDuration` 60 s
+- **Effect:** (re)generates the session's Study Pack (one `generateJson` call, validated by `validateStudyPack`) and stores it
+- **Response:** `StudyPack` `{ summary[], concepts[{name,segmentId,startS,endS}], quiz[{question,options[4],correctIndex,explanation,segmentId,startS,endS}], highlights[{segmentId,startS,endS,label}] }`
+- **Errors:** `400` not ready / too short · `401` · `404` · `502` AI failed · `503` no `GEMINI_API_KEY`
+- Study Packs are also generated automatically after ingest (`after()` in the webhook)
+
+### `POST /api/events`
+- **Auth:** public · **Request:** `{ "segmentId": int, "kind": "open" | "share" }` · **Response:** `204` · `404` unknown segment
+- Anonymous Moment analytics for organizer Insights
+
+### `GET /api/insights`
+- **Auth:** organizer · **Response:** `{ totals: { questions, answeredRate, shares }, gaps[{question,times,lastAsked}], topQuestions[{question,times,answered}], topMoments[{segmentId,lectureId,title,startS,text,opens,shares}] }` (last 30 days)
+
+### `POST /api/ask` (additions)
+- Response adds `reel: { url, durationS, clips } | null`, the Answer Reel (Phase 12)
+- Every Ask is logged to `ask_log` after the response (`after()`), with no identity
