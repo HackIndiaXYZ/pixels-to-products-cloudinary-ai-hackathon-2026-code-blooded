@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { AskAnswer } from "@/components/AskAnswer";
 import { MomentButton } from "@/components/MomentButton";
 import { ResultCard } from "@/components/ResultCard";
 import { SearchBar } from "@/components/SearchBar";
@@ -19,6 +20,7 @@ export default async function SearchPage({ searchParams }: Props) {
   return (
     <div className="mt-4">
       <SearchBar defaultValue={q} />
+      {q.length >= 3 && <AskAnswer key={q} question={q} />}
 
       <section aria-labelledby="found-heading" className="mt-8">
         <h2 id="found-heading" className="text-sm font-semibold tracking-wide text-muted uppercase">
