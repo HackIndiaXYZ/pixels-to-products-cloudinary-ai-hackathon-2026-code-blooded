@@ -23,8 +23,8 @@ git commit -m "feat(ask): validate citations against retrieved segments"
 git push -u origin feature/<feature-name>
 gh pr create --base main --title "feat(ask): grounded answers with clip citations" --body-file <pr-body.md>
 
-# 5. CI green + Vercel preview works → merge, delete the branch
-gh pr merge --squash --delete-branch
+# 5. CI green + Vercel preview works → merge (merge commit), delete the branch
+gh pr merge --merge --delete-branch
 
 # 6. Bring local main up to date — every time, immediately
 git checkout main
@@ -74,7 +74,8 @@ Lowercase, kebab-case, describes the feature — not a person or a date.
 - Body uses `.github/pull_request_template.md`: which phase doc it implements, what changed, checklist.
 - **No AI attribution in PR titles, bodies or comments** — no "🤖 Generated with Claude Code" footer.
 - Merge only when: CI (lint, typecheck, unit tests) is green and the Vercel preview deploy works for the changed flow.
-- **Squash merge** — `main` gets one clean commit per feature, titled like the PR. Delete the branch after merge.
+- **Merge commit** (`gh pr merge --merge`) — keeps each feature's commits and a "Merge pull request #n" commit on `main`, and keeps follow-up branches mergeable without rewriting history. Delete the branch after merge.
+- One feature in flight at a time: branch from a fresh `main`, PR, CI green, merge, then start the next. No stacked PRs.
 
 ## Keeping `main` Healthy
 
