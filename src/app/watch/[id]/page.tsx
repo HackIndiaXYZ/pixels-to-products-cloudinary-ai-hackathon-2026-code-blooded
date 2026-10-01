@@ -5,6 +5,7 @@ import { z } from "zod";
 import { WatchView } from "@/components/WatchView";
 import { formatTime } from "@/lib/format";
 import { getLecture, getSegments } from "@/lib/lectures";
+import { getStudyPack } from "@/lib/study-packs";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -26,7 +27,8 @@ export default async function WatchPage({ params, searchParams }: Props) {
   if (!lecture) notFound();
 
   const startAt = Math.max(0, Number(t) || 0);
-  const segments = lecture.status === "ready" ? await getSegments(lecture.id) : [];
+  const ready = lecture.status === "ready";
+  const [segments, pack] = ready ? await Promise.all([getSegments(lecture.id), getStudyPack(lecture.id)]) : [[], null];
 
   return (
     <article className="mt-4">
@@ -38,6 +40,7 @@ export default async function WatchPage({ params, searchParams }: Props) {
         startAt={startAt}
         searchable={lecture.status === "ready"}
         segments={segments}
+        pack={pack}
       />
       <header className="mt-5">
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{lecture.title}</h1>

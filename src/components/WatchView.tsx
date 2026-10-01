@@ -4,8 +4,10 @@ import { useMemo, useRef, useState } from "react";
 
 import { MomentButton } from "@/components/MomentButton";
 import { Player } from "@/components/Player";
+import { StudyPanel } from "@/components/StudyPanel";
 import { formatTime } from "@/lib/format";
 import type { SegmentRow } from "@/lib/lectures";
+import type { StudyPack } from "@/lib/study-pack-schema";
 
 type Props = {
   lectureId: string;
@@ -15,12 +17,14 @@ type Props = {
   startAt: number;
   searchable: boolean;
   segments: SegmentRow[];
+  pack: StudyPack | null;
 };
 
-export function WatchView({ lectureId, publicId, title, durationS, startAt, searchable, segments }: Props) {
+export function WatchView({ lectureId, publicId, title, durationS, startAt, searchable, segments, pack }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [time, setTime] = useState(startAt);
   const [filter, setFilter] = useState("");
+  const [tab, setTab] = useState<"transcript" | "study">(pack ? "study" : "transcript");
 
   const currentIndex = useMemo(() => {
     let index = 0;
@@ -61,6 +65,7 @@ export function WatchView({ lectureId, publicId, title, durationS, startAt, sear
               endS={current.endS}
               durationS={durationS}
               words={current.words}
+              segmentId={current.id}
               label="Share this moment"
               className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-fg"
             />
@@ -73,7 +78,28 @@ export function WatchView({ lectureId, publicId, title, durationS, startAt, sear
       </div>
 
       {segments.length > 0 && (
-        <aside aria-label="Transcript" className="rounded-2xl border border-border bg-surface lg:max-h-[70vh] lg:overflow-hidden">
+        <aside aria-label="Session tools" className="rounded-2xl border border-border bg-surface lg:max-h-[78vh] lg:overflow-hidden">
+          {pack && (
+            <div role="tablist" className="flex border-b border-border text-sm font-medium">
+              {(["study", "transcript"] as const).map((t) => (
+                <button
+                  key={t}
+                  role="tab"
+                  aria-selected={tab === t}
+                  onClick={() => setTab(t)}
+                  className={`flex-1 px-3 py-2.5 capitalize ${tab === t ? "border-b-2 border-accent text-fg" : "text-muted hover:text-fg"}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
+          {tab === "study" && pack ? (
+            <div className="max-h-[60vh] overflow-y-auto lg:max-h-[calc(78vh-44px)]">
+              <StudyPanel pack={pack} publicId={publicId} onSeek={seek} />
+            </div>
+          ) : (
+          <>
           <div className="border-b border-border p-3">
             <input
               type="search"
@@ -105,6 +131,8 @@ export function WatchView({ lectureId, publicId, title, durationS, startAt, sear
             })}
             {visible.length === 0 && <li className="p-3 text-sm text-muted">Nothing in this session matches.</li>}
           </ol>
+          </>
+          )}
         </aside>
       )}
     </div>
