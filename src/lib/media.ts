@@ -83,6 +83,31 @@ export function trackingWarmupUrl(publicId: string, cloud = CLOUD): string {
   return [base(cloud), "so_0,eo_1", VERTICAL_CROP.replace("w_720", "w_90"), "q_auto", `${publicId}.mp4`].join("/");
 }
 
+export const SHARE_CARD = { width: 1200, height: 630 } as const;
+const CARD_TITLE_MAX = 90;
+
+// A designed Open Graph image as one URL: the g_auto frame at the moment, faded at the top and bottom
+// (the middle — usually the speaker — stays bright), the Pravaha mark, the title and a subtitle line.
+// WhatsApp, LinkedIn and Slack previews come straight from Cloudinary; no image service of our own.
+export function shareCardUrl(
+  publicId: string,
+  atS: number,
+  { title, subtitle }: { title: string; subtitle?: string | null },
+  cloud = CLOUD,
+): string {
+  const clipped = title.length > CARD_TITLE_MAX ? `${title.slice(0, CARD_TITLE_MAX - 1).trimEnd()}…` : title;
+  const parts = [
+    `so_${sec(atS)},c_fill,w_${SHARE_CARD.width},h_${SHARE_CARD.height},g_auto`,
+    "e_gradient_fade:symmetric_pad,y_-0.5,b_black",
+    `l_text:arial_30_bold:${encodeLayerText("Pravaha")},co_white,b_rgb:0f766e/fl_layer_apply,g_north_west,x_60,y_56`,
+    `l_text:arial_60_bold:${encodeLayerText(clipped)},co_white,w_1080,c_fit/fl_layer_apply,g_south_west,x_60,y_130`,
+  ];
+  if (subtitle) {
+    parts.push(`l_text:arial_34:${encodeLayerText(subtitle)},co_rgb:99f6e4/fl_layer_apply,g_south_west,x_60,y_70`);
+  }
+  return [base(cloud), ...parts, "f_jpg,q_auto", `${publicId}.jpg`].join("/");
+}
+
 // The same window in the original 16:9 framing — for inline playback of a citation.
 export function clipUrl(publicId: string, startS: number, endS: number, cloud = CLOUD): string {
   const { start, end } = momentWindow(startS, endS);

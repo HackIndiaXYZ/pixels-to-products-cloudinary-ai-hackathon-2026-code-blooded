@@ -8,6 +8,7 @@ import {
   momentUrl,
   momentWindow,
   reelUrl,
+  shareCardUrl,
   thumbUrl,
   trackingWarmupUrl,
 } from "@/lib/media";
@@ -130,5 +131,29 @@ describe("reelUrl (Answer Reels, verified on real output)", () => {
 
   it("returns null with no clips", () => {
     expect(reelUrl([], CLOUD)).toBeNull();
+  });
+});
+
+describe("shareCardUrl (Open Graph cards, verified on real output)", () => {
+  const card = (title: string, subtitle?: string) => shareCardUrl(ID, 11.94, { title, subtitle }, CLOUD);
+
+  it("composes the g_auto frame, edge fade, brand mark, title and subtitle as one 1200×630 image", () => {
+    expect(card("Overfitting, explained", "Prof. David · 0:11")).toBe(
+      `${V}/so_11.9,c_fill,w_1200,h_630,g_auto/e_gradient_fade:symmetric_pad,y_-0.5,b_black/` +
+        `l_text:arial_30_bold:Pravaha,co_white,b_rgb:0f766e/fl_layer_apply,g_north_west,x_60,y_56/` +
+        `l_text:arial_60_bold:Overfitting%252C%20explained,co_white,w_1080,c_fit/fl_layer_apply,g_south_west,x_60,y_130/` +
+        `l_text:arial_34:Prof.%20David%20%C2%B7%200%3A11,co_rgb:99f6e4/fl_layer_apply,g_south_west,x_60,y_70/` +
+        `f_jpg,q_auto/${ID}.jpg`,
+    );
+  });
+
+  it("omits the subtitle layer when there is none", () => {
+    expect(card("Title")).not.toContain("arial_34:");
+  });
+
+  it("truncates very long titles so the card never overflows", () => {
+    const url = card("x".repeat(200));
+    expect(url).toContain(`${"x".repeat(89)}%E2%80%A6,`);
+    expect(url).not.toContain("x".repeat(90));
   });
 });
