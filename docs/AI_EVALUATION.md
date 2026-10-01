@@ -23,7 +23,7 @@ Two kinds of AI run in Pravaha:
 
 ### Why this design is trustworthy
 
-- **Hallucination:** Claude can only point at segments we retrieved; anything else is deleted before the learner sees it. An answer with no surviving citation is never shown — the learner sees "not covered in this library."
+- **Hallucination:** the model can only point at segments we retrieved; anything else is deleted before the learner sees it. An answer with no surviving citation is never shown — the learner sees "not covered in this library."
 - **Verifiability:** every claim plays as a clip of the original speaker. The learner checks the source in one tap — that's the product's core promise, and it doubles as the hallucination check.
 - **Prompt injection:** transcripts are untrusted (anyone can *say* "ignore previous instructions" in a talk). The model has no tools, its output is schema-validated, and its only power is choosing which of our retrieved IDs to cite. Worst case: an odd sentence in an answer that still links to real footage.
 

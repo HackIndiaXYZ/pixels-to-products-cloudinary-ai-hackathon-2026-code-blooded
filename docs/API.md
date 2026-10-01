@@ -68,7 +68,7 @@ JSON in, JSON out. Errors: `{ "error": { "code": string, "message": string } }`.
                     "startS": 754.2, "endS": 764.9, "text": "…", "momentUrl": "https://res.cloudinary.com/…" }]
   }
   ```
-  `not_found`: no retrieved segments, or Claude cited nothing valid → `answer` is a fixed "not covered in this library" message. `fallback`: Claude errored/timed out → `answer` is null, `citations` are the top retrieved segments (Find results as clips — NFR4).
+  `not_found`: no retrieved segments, or the model cited nothing valid → `answer` is a fixed "not covered in this library" message. `fallback`: every model in the AI chain errored or timed out (or no `GEMINI_API_KEY`) → `answer` is null, `citations` are the top retrieved segments (Find results as clips — NFR4).
 - **Errors:** `400` · `429`
 
 ---

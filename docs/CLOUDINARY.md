@@ -23,7 +23,7 @@ Learner (browser) ◀── HLS adaptive stream · Moment clips · g_auto thumbn
 | Watch | `auto_chaptering` | A chaptering model |
 | Watch | Video Player: HLS adaptive streaming, chapters, subtitles | An encoding ladder (FFmpeg) + HLS packaging + a player |
 | Find / Ask | The transcript is the corpus both pillars search | Our own STT output |
-| Moments | Trim (`so_`/`eo_`) + `c_fill,ar_9:16,g_auto` + `l_subtitles` + `f_auto,q_auto` | An FFmpeg render queue, face/subject tracking, subtitle burning, storage for every rendered clip |
+| Moments | Trim (`so_`/`eo_`) + `c_fill,ar_9:16,g_auto` + timed `l_text` captions + `f_auto,q_auto` | An FFmpeg render queue, face/subject tracking, subtitle burning, storage for every rendered clip |
 | Ask | `l_video:…,fl_splice` + timed `l_text` speaker labels: **Answer Reels** | A video editing/concatenation pipeline per question |
 | Library | `g_auto` video thumbnails, `f_auto,q_auto` | A frame-extraction job + image pipeline |
 | Status | Webhooks (`notification_url`) | Polling the rate-limited Admin API |

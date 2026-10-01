@@ -31,7 +31,7 @@ Colleges, clubs and coaching institutes record hundreds of hours of lectures and
 | `auto_transcription` | Word-timed transcript: the corpus for Find and Ask, and subtitles |
 | `auto_chaptering` | AI chapters on the player's seek bar |
 | Cloudinary Video Player (HLS) | Adaptive streaming that survives slow mobile data |
-| `so_`/`eo_` + `c_fill,ar_9:16,g_auto` + `l_subtitles` + `f_auto,q_auto` | **Moments**: trimmed, subject-tracked, subtitled vertical clips |
+| `so_`/`eo_` + `c_fill,ar_9:16,g_auto` + timed `l_text` captions + `f_auto,q_auto` | **Moments**: trimmed, subject-tracked, subtitled vertical clips |
 | `g_auto` thumbnails | Content-aware library and result frames |
 | `l_video:…,fl_splice` + timed `l_text` labels | **Answer Reels**: cited moments from several sessions stitched into one labelled video |
 | Webhooks (`notification_url`) | Upload → `ready` with no polling |

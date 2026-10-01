@@ -19,7 +19,7 @@ Rule: make the intelligence visible, hide the machinery. Learners see answers, m
 
 ## Search / Ask `/search?q=`
 
-- **Answer card** (top): skeleton with shimmering lines while Claude answers. Retrieved clip cards render **before** the answer arrives, so the page is never empty.
+- **Answer card** (top): skeleton with shimmering lines while the model answers. Retrieved clip cards render **before** the answer arrives, so the page is never empty.
 - Answer text with citation chips `[1] [2]`; tapping a chip scrolls to and pulses its clip card.
 - **Citation / result card:** thumbnail at the moment, session title + speaker, timestamp chip `12:34`, quoted snippet (search terms bold), actions: ▶ Play (inline trimmed clip), **Open full session** (→ `/watch/id?t=`), **Share as Moment**.
 - **States:**

@@ -53,7 +53,7 @@ Secrets scan · cold test on someone else's phone · Cloudinary feedback survey 
 
 | Person | Owns |
 |---|---|
-| A — "Pipeline" | 01, 03 (API side), 05, 06 (SQL), 08 (retrieval + Claude + validation) |
+| A — "Pipeline" | 01, 03 (API side), 05, 06 (SQL), 08 (retrieval + AI + validation) |
 | B — "Experience" | 02, 03 (Studio UI), 04, 07, 08 (Ask UI), 09 (mobile polish) |
 | C / D (if any) | Library content (Day 2), demo script + recording, README, screenshots, submission |
 

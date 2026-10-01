@@ -105,8 +105,8 @@ Learner: open home → type a question → answer with 2–4 cited clip cards �
 |---|---|
 | NFR1 | Video bytes never pass through our server — upload and delivery are browser ↔ Cloudinary |
 | NFR2 | Processing status is always visible to the organizer — never a silent black box |
-| NFR3 | Cloudinary API secret, Anthropic key and DB URL are server-only |
-| NFR4 | **Graceful degradation everywhere:** transcription fails → video still plays; Claude fails → Ask falls back to Find results as clips; Moment transform slow → "generating" state, never a broken player |
+| NFR3 | Cloudinary API secret, Gemini key and DB URL are server-only |
+| NFR4 | **Graceful degradation everywhere:** transcription fails → video still plays; the AI fails → Ask falls back to Find results as clips; Moment transform slow → "generating" state, never a broken player |
 | NFR5 | Ask is rate-limited per IP and globally capped per day (it costs money and is public) |
 | NFR6 | Mobile-first; core flows need no training |
 | NFR7 | Dev and demo usage stays within Cloudinary's free tier |
@@ -148,7 +148,7 @@ Learner: open home → type a question → answer with 2–4 cited clip cards �
 
 ## 17. Dependencies
 
-Cloudinary (free tier, US region) · Neon Postgres (free) · Vercel (Hobby) · Anthropic API (Claude) — for Ask only.
+Cloudinary (free tier, US region) · Neon Postgres (free) · Vercel (Hobby) · Google Gemini — for Ask and Study Packs.
 
 ## 18. Future Roadmap
 

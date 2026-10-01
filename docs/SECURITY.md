@@ -8,7 +8,7 @@
 | `/api/webhooks/cloudinary` | Anyone on the internet | Cloudinary signature over raw body + timestamp freshness |
 | `/api/ask` | Anyone; costs money per call | Zod validation, per-IP + global rate limit, Gemini billing budget alert |
 | `/api/search`, lecture reads | Anyone | Zod validation, parameterized SQL, public+ready filter |
-| Claude | Untrusted transcript text inside the prompt | No tools, schema output, citation validation |
+| Gemini (`src/lib/ai.ts`) | Untrusted transcript text inside the prompt | No tools, schema output, citation validation |
 
 ## Organizer Authentication
 
@@ -30,7 +30,7 @@
 | `ORGANIZER_PASSCODE`, `SESSION_SECRET` | Server-only |
 | `APP_URL` | Config (webhook URL base) |
 
-Server modules (`src/lib/cloudinary.ts`, `db.ts`, `claude.ts`, `auth.ts`) import `server-only`. `.env*.local` is git-ignored; `.env.example` holds names only. Before every push: `git diff --cached | grep -iE "secret|api_key|passcode|postgres://"` must be empty of values.
+Server modules (`src/lib/cloudinary.ts`, `db.ts`, `ai.ts`, `answer.ts`, `auth.ts`, `env.ts`) import `server-only`. `.env*.local` is git-ignored; `.env.example` holds names only. Before every push: `git diff --cached | grep -iE "secret|api_key|passcode|postgres://"` must be empty of values.
 
 ## Upload Security
 
@@ -42,7 +42,7 @@ Verify `X-Cld-Signature` over the **raw** body + `X-Cld-Timestamp` with the SDK 
 
 ## Input Validation & Output Encoding
 
-Zod on every body and query. SQL is parameterized only. `ts_headline` marks matches with sentinel characters that are split into plain-text React nodes — no snippet is ever rendered as HTML. Claude's answer is rendered as plain text with citation chips — never `dangerouslySetInnerHTML`.
+Zod on every body and query. SQL is parameterized only. `ts_headline` marks matches with sentinel characters that are split into plain-text React nodes — no snippet is ever rendered as HTML. The model's answer is rendered as plain text with citation chips — never `dangerouslySetInnerHTML`.
 
 ## Prompt Injection
 

@@ -2,12 +2,12 @@
 
 ## System Overview
 
-One Next.js application (frontend + API routes) on Vercel, one Postgres database (Neon), Cloudinary as the media / AI / transformation / delivery layer, and Claude for exactly one job: grounded answers in **Ask**. One deployable unit — not a distributed system.
+One Next.js application (frontend + API routes) on Vercel, one Postgres database (Neon), Cloudinary as the media / AI / transformation / delivery layer, and Gemini for grounded, citation-validated generation: answers in **Ask** and per-session **Study Packs**. One deployable unit — not a distributed system.
 
 ```
 Browser ──signed upload──▶ Cloudinary ──webhook──▶ Next.js API ──▶ Postgres (segments, FTS)
 Browser ◀──HLS / clips / thumbnails── Cloudinary CDN
-Browser ──question──▶ Next.js API ──retrieve──▶ Postgres ──top segments──▶ Claude ──cited answer──▶ Browser
+Browser ──question──▶ Next.js API ──retrieve──▶ Postgres ──top segments──▶ Gemini ──cited answer──▶ Browser
 ```
 
 ## Frontend
@@ -18,7 +18,7 @@ Browser ──question──▶ Next.js API ──retrieve──▶ Postgres ─
 
 ## Backend
 
-**Next.js route handlers — no separate service.** The app's own logic is small and I/O-bound: sign uploads, ingest webhooks, run FTS queries, call Claude once per question, compose transformation URLs.
+**Next.js route handlers — no separate service.** The app's own logic is small and I/O-bound: sign uploads, ingest webhooks, run FTS queries, call the model once per question, compose transformation URLs.
 *Why not Python/FastAPI:* a second deployable for no capability gain.
 
 ## Database
@@ -34,7 +34,7 @@ Detailed in `CLOUDINARY.md`. Summary: signed upload, `auto_transcription`, `auto
 ## AI
 
 **Gemini via `@google/genai` (`src/lib/ai.ts`), with a model fallback chain `gemini-3.6-flash → gemini-3.1-flash-lite → gemini-3.5-flash-lite`.** Used for Ask and, from Phase 13, Study Packs. Input: the question + the top ~12 retrieved transcript segments (with IDs). Output: structured JSON (`responseJsonSchema` derived from the validating Zod schema): an answer with inline `[n]` markers and the list of segment IDs it cites. The server **rejects any cited ID that wasn't in the retrieved set**; if nothing valid remains, the response is a refusal, not an answer. Full spec: `AI_EVALUATION.md`.
-*Why Claude is narrow:* Cloudinary does the media understanding (speech-to-text, chaptering, cropping). Claude does the one thing Cloudinary doesn't: reason across many transcripts to answer a question. That split is the honest answer to "what's AI here?"
+*Why the LLM is narrow:* Cloudinary does the media understanding (speech-to-text, chaptering, cropping). The LLM does the one thing Cloudinary doesn't: reason across many transcripts to answer a question. That split is the honest answer to "what's AI here?"
 *Removed from v1:* chapter-title cleanup (Cloudinary's `auto_chaptering` produces titles) and query normalization (Postgres `plainto_tsquery` with OR-ed terms handles natural-language queries).
 
 ## Authentication & Authorization

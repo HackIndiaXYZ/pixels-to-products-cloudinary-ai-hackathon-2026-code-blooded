@@ -1,4 +1,4 @@
-// Turns Claude's raw answer into something safe to show: every citation must point at a segment we
+// Turns the model's raw answer into something safe to show: every citation must point at a segment we
 // actually retrieved and handed to the model. Anything else is deleted before the learner sees it,
 // and an answer left with no valid citation is not shown at all.
 

@@ -1,5 +1,17 @@
 # Documentation Consistency Audit — Pravaha
 
+## Audit 3 — Oct 1, 2026 (v3 + Phase 16)
+
+| Check | Result |
+|---|---|
+| `openapi.yaml` covers every route in `src/app/api` (incl. v3 study-pack, events, insights, Answer Reel) | Fixed — validated with Redocly |
+| No current-state doc names Claude/Anthropic as the AI provider (historical records — v1 archive, Phase 08, superseded `DECISIONS.md` rows, Strategy Revisit — keep it on purpose) | Fixed |
+| Moment captions described as timed `l_text` cards, not `l_subtitles` | Fixed |
+| Merge strategy = merge commit in `GIT_WORKFLOW.md`, `CONTRIBUTING.md`, `ARCHITECTURE.md` | Fixed |
+| `ARCHITECTURE.md` ingest sequence matches the two-step create → sign flow | Fixed |
+| Log event names in `OBSERVABILITY.md` match the code (`ai.error`) | Fixed |
+
+
 ## Audit 2 — Oct 1, 2026 (v2 re-scope)
 
 Every v2 doc cross-checked after the re-scope.

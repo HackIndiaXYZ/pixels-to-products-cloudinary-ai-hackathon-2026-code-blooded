@@ -40,7 +40,7 @@ Transcript quality on real accents; Moment playback on iOS Safari + Android Chro
 | Bad webhook signature / replay | `webhook-signature.test.ts` — no DB write |
 | Duplicate webhook delivery | Manual replay → same row count (delete-then-insert TX) |
 | Transcription failure | `transcript_failed` state, video still plays — manual |
-| Claude failure / timeout / bad JSON | `citations.test.ts` + manual with key removed → `fallback` |
+| AI failure / timeout / bad JSON | `citations.test.ts` + manual with key removed → `fallback` |
 | Hallucinated citation | `citations.test.ts` |
 | Question not in library | Eval set (3 questions) → `not_found` |
 | Rate limiting | Manual: 21 Asks in an hour → `429` |

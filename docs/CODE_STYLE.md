@@ -33,4 +33,4 @@ Explain *why*, not *what* — the code already says what it does. A comment earn
 
 ## Server/Client Boundaries
 
-Anything touching a secret (`src/lib/cloudinary.ts`, `db.ts`, `claude.ts`, `auth.ts`, `env.ts`) imports Next.js's `server-only` at the top — a structural guardrail against an accidental client-bundle leak, not just a naming convention that relies on memory.
+Anything touching a secret (`src/lib/cloudinary.ts`, `db.ts`, `ai.ts`, `answer.ts`, `auth.ts`, `env.ts`) imports Next.js's `server-only` at the top — a structural guardrail against an accidental client-bundle leak, not just a naming convention that relies on memory.
