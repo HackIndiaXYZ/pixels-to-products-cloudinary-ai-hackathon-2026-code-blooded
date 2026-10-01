@@ -41,7 +41,7 @@ Verify `X-Cld-Signature` over the **raw** body + `X-Cld-Timestamp` with the SDK 
 
 ## Input Validation & Output Encoding
 
-Zod on every body and query. SQL is parameterized only. `ts_headline` snippets are HTML-escaped first, then only `<b>` markers are re-allowed. Claude's answer is rendered as plain text with citation chips — never `dangerouslySetInnerHTML`.
+Zod on every body and query. SQL is parameterized only. `ts_headline` marks matches with sentinel characters that are split into plain-text React nodes — no snippet is ever rendered as HTML. Claude's answer is rendered as plain text with citation chips — never `dangerouslySetInnerHTML`.
 
 ## Prompt Injection
 
