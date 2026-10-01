@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 
+import type { TimedWord } from "@/lib/segments";
+
 import { formatTime } from "@/lib/format";
 import { momentUrl } from "@/lib/media";
 
@@ -12,25 +14,46 @@ type Props = {
   startS: number;
   endS: number;
   durationS?: number | null;
+  words?: TimedWord[];
   label?: string;
   className?: string;
 };
 
 // "Share as Moment": a vertical, AI-cropped, subtitled clip of exactly this moment, shared as a link.
 // Native <dialog> + Web Share API — no modal or share library.
-export function MomentButton({ publicId, lectureId, title, startS, endS, durationS, label, className }: Props) {
+export function MomentButton({ publicId, lectureId, title, startS, endS, durationS, words, label, className }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
-  const [open, setOpen] = useState(false);
-  const [state, setState] = useState<"loading" | "ready" | "failed">("loading");
+  const openRef = useRef(false);
+  const [src, setSrc] = useState<string | null>(null);
+  const [state, setState] = useState<"loading" | "tracking" | "ready" | "failed">("loading");
   const [copied, setCopied] = useState(false);
-  const url = momentUrl(publicId, startS, endS, { durationS });
+  const url = momentUrl(publicId, startS, endS, { durationS, words });
   const sessionPath = `/watch/${lectureId}?t=${Math.floor(startS)}`;
+
+  // Asking for the URL is what makes Cloudinary build the clip. Its AI tracking-crop answers 423 while it
+  // analyses the video, so wait and retry instead of showing a broken player.
+  async function prepare() {
+    for (let attempt = 0; attempt < 40 && openRef.current; attempt++) {
+      try {
+        const res = await fetch(url, { method: "HEAD" });
+        if (res.ok) break;
+        if (res.status !== 423) return setState("failed");
+        setState("tracking");
+      } catch {
+        break; // HEAD blocked (e.g. CORS): let the <video> element try directly
+      }
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+    if (openRef.current) setSrc(url);
+  }
 
   function show() {
     setState("loading");
     setCopied(false);
-    setOpen(true); // mounting the <video> is what asks Cloudinary to generate the clip
+    setSrc(null);
+    openRef.current = true;
     dialog.current?.showModal();
+    void prepare();
   }
 
   async function share() {
@@ -58,7 +81,10 @@ export function MomentButton({ publicId, lectureId, title, startS, endS, duratio
       </button>
       <dialog
         ref={dialog}
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          openRef.current = false;
+          setSrc(null);
+        }}
         onClick={(e) => e.target === dialog.current && dialog.current.close()}
         className="m-auto w-[min(92vw,380px)] rounded-3xl border border-border bg-surface p-4 text-fg backdrop:bg-black/60"
       >
@@ -73,14 +99,14 @@ export function MomentButton({ publicId, lectureId, title, startS, endS, duratio
         <div className="relative mt-3 aspect-[9/16] overflow-hidden rounded-2xl bg-black">
           {state !== "ready" && (
             <p className="absolute inset-0 grid place-items-center px-6 text-center text-sm text-white/80">
-              {state === "loading"
-                ? "Generating your clip — trimming, cropping to the speaker and adding subtitles…"
-                : "This clip is taking a while. Close and try again in a moment."}
+              {state === "loading" && "Generating your clip — trimming, cropping to the speaker and adding captions…"}
+              {state === "tracking" && "Cloudinary's AI is finding the speaker in this session — first time only, a few seconds…"}
+              {state === "failed" && "This clip is taking a while. Close and try again in a moment."}
             </p>
           )}
-          {open && (
+          {src && (
             <video
-              src={url}
+              src={src}
               className="relative h-full w-full object-cover"
               controls
               autoPlay

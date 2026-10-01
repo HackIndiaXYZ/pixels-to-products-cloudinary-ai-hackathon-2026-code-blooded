@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "eval:ask": "node scripts/eval-ask.mjs"
+    "eval:ask": "node scripts/eval-ask.mjs",
+    "db:migrate": "node scripts/migrate.mjs",
+    "spike": "node scripts/spike.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",

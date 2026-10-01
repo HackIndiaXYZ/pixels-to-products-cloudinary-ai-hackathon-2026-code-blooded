@@ -18,7 +18,10 @@ const Body = z.object({
 
 const FALLBACK_CLIPS = 4;
 
-const withMoment = (h: Hit & { n: number }) => ({ ...h, momentUrl: momentUrl(h.publicId, h.startS, h.endS) });
+const withMoment = (h: Hit & { n: number }) => ({
+  ...h,
+  momentUrl: momentUrl(h.publicId, h.startS, h.endS, { durationS: h.durationS, words: h.words }),
+});
 
 export async function POST(request: Request) {
   const started = Date.now();

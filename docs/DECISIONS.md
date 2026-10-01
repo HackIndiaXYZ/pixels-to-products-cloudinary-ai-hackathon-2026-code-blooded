@@ -20,6 +20,7 @@ The running answer to "why did you build it this way," logged as decisions were 
 | Model | Haiku 4.5 vs. Sonnet 5.5 vs. Opus 5.5 | **`claude-opus-5-5` at effort `low`** (revised in Phase 08) | Opus 5.5 is the current default model and cheaper per token than earlier Opus; answer quality and citation discipline *are* the demo; `low` effort keeps latency down for a short grounded answer. Server-side `fallbacks: "default"` re-runs a classifier-declined request on the recommended model | Higher per-call cost than Sonnet/Haiku — bounded by the rate limits and console spend cap; dropping to Sonnet is a one-line change if cost matters |
 | Ingest status | Webhook vs. polling Admin API | **Webhook** (unchanged) | Admin API is 500 req/hr on Free | Needs a public URL → deploy on Day 1 |
 | `public_id` | Cloudinary-generated vs. server-chosen | **Server-chosen `pravaha/<lecture uuid>`, signed** | Lecture row exists before upload; webhook can never arrive for an unknown asset | — |
+| Moment captions | `l_subtitles:{id}.transcript` overlay vs. timed `l_text` cards from word timings | **Timed `l_text` cards** (Phase 01) | The subtitle overlay is timed against the trimmed output, so Moments drifted (verified on frames) and it needs an explicit font. Cards built from stored word timings are exact | Longer URLs (about 2–3 KB for a 15 s Moment) and one more JSONB column |
 | Data access | ORM (Prisma/Drizzle) vs. raw `pg` | **Raw parameterized SQL via `pg`** | Three tables, ~8 queries | Hand-written row mapping |
 
 ## v1 decisions still standing

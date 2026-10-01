@@ -1,6 +1,6 @@
 # Cloudinary Technical Design — Pravaha
 
-This document answers one question for every capability used: **why Cloudinary, specifically, and what breaks without it.** Items marked **[verify P01]** are confirmed against docs but must be confirmed against real output in Phase 01 before code depends on them.
+This document answers one question for every capability used: **why Cloudinary, specifically, and what breaks without it.** Every composition below was verified against real output in Phase 01 (`docs/phases/PHASE-01-cloudinary-spike.md` → Findings).
 
 ## 1. Architecture Overview
 
@@ -34,8 +34,8 @@ Two steps. `POST /api/lectures` (organizer-only) creates the `lectures` row with
 The Cloudinary AI work is configured on the **signed upload preset** `pravaha_signed`, not sent by the browser — so no client can add or alter it:
 
 ```
-auto_transcription = true                          (P2: translate to hi-IN) [verify P01]
-auto_chaptering    = true                          [verify P01]
+auto_transcription = true                          (verified; P2: translate)
+auto_chaptering    = true                          (verified)
 notification_url   = <APP_URL>/api/webhooks/cloudinary
 allowed formats    = mp4, mov, webm, mkv, m4v · max file size 500 MB · no folder (public_id already has one)
 ```
@@ -45,7 +45,7 @@ Bytes go browser → Cloudinary; our server never sees them. If Phase 01 shows a
 ## 4. AI Processing
 
 - **`auto_transcription`** — produces raw asset `{public_id}.transcript`: JSON lines, each `{ transcript, confidence, words: [{ word, start_time, end_time }] }`. Word-level timing is what makes "jump to the exact second" and clip-precise citations possible. Webhook payload: `{ info_kind: "auto_transcription", info_status: "complete" | "failed", public_id }`.
-- **`auto_chaptering`** — AI-identified chapter boundaries with titles; the Video Player renders them on the seek bar. Chapter titles are also attached to our segments for nicer search results. Output file name/format **[verify P01]**.
+- **`auto_chaptering`** — AI-identified chapter boundaries with titles, written to `raw/upload/{public_id}-chapters.vtt` (WebVTT, verified). The Video Player renders them on the seek bar; titles are also attached to our segments.
 - **Region constraint:** transcription is unavailable on Cloudinary's Asia-Pacific data center. The account must be on the default (US) region (`SETUP.md`).
 
 ## 5. Delivery — Watch
@@ -54,22 +54,25 @@ Bytes go browser → Cloudinary; our server never sees them. If Phase 01 shows a
 
 ## 6. Transformations — Moments
 
-A Moment is **a URL, not a render job**. Built by one pure function, `momentUrl(publicId, startS, endS)`:
+A Moment is **a URL, not a render job**, built by one pure function, `momentUrl()`. The composition was verified on real output (Phase 01 findings):
 
 ```
 https://res.cloudinary.com/<cloud>/video/upload/
-  so_<start>,eo_<end>/                 trim to the cited segment (≤ 60 s, padded ±1.5 s)
-  c_fill,ar_9:16,w_720,g_auto/         AI crop to vertical, tracking the speaker/subject
-  l_subtitles:<public_id>.transcript/fl_layer_apply/   burned-in subtitles
-  f_auto,q_auto/                       best format/quality per device
+  so_<start>,eo_<end>/                         trim to the cited segment (padded ±1.5 s, ≤ 60 s)
+  c_fill,ar_9:16,w_720,g_auto/                 AI tracking-crop to vertical (g_auto MUST be its own component)
+  l_text:arial_46_bold:<words>,co_white,b_rgb:000000b3,w_660,c_fit/fl_layer_apply,g_south,y_220,so_<a>,eo_<b>/
+  …one timed caption card per ≤4 words, built from the segment's word timings…
+  f_auto:video,q_auto/                         best format/quality per device
   <public_id>.mp4
 ```
 
-Exact component order — particularly whether subtitles must precede the trim to stay in sync — is **[verify P01]**. First request generates the derivative (seconds); the UI shows "generating…" and pre-warms on click. A 60-second 720p clip is far below the free-plan on-the-fly video size limits.
+Why not `l_subtitles:{id}.transcript`: it renders only with an explicit font, and it's timed against the trimmed output, so mid-video Moments drift. Timed `l_text` cards are exact.
+
+**Tracking-crop latency:** the first `g_auto` video request per asset returns `423 Video tracking-crop is pending` while Cloudinary analyses the video. Pravaha (1) pre-warms it at ingest with a tiny `g_auto` derivative (`trackingWarmupUrl()`), and (2) the Moment sheet polls with `HEAD` through `423` before playing.
 
 ## 7. Thumbnails
 
-`so_auto` is not assumed; we use the session's first chapter start (or 10% of duration) with `c_fill,ar_16:9,w_640,g_auto,f_auto,q_auto` on a `.jpg` derived from the video — content-aware framing instead of a random frame.
+A `.jpg` frame from the video at the moment (`so_<t>,c_fill,ar_16:9,w_640,g_auto/f_auto,q_auto`), verified working. Content-aware framing instead of a blind centre crop.
 
 ## 8. Metadata
 

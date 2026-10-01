@@ -2,6 +2,7 @@ import "server-only";
 
 import { query } from "@/lib/db";
 import { HIT_END, HIT_START, splitHighlights, type SnippetPart } from "@/lib/highlight";
+import type { TimedWord } from "@/lib/segments";
 
 export type Hit = {
   segmentId: number;
@@ -13,6 +14,8 @@ export type Hit = {
   endS: number;
   text: string;
   chapterTitle: string | null;
+  durationS: number | null;
+  words: TimedWord[];
   snippet: SnippetPart[];
 };
 
@@ -26,6 +29,8 @@ type Row = {
   end_s: number;
   text: string;
   chapter_title: string | null;
+  duration_s: number | null;
+  words: TimedWord[];
   snippet: string;
 };
 
@@ -45,6 +50,8 @@ function toHit(r: Row): Hit {
     endS: r.end_s,
     text: r.text,
     chapterTitle: r.chapter_title,
+    durationS: r.duration_s,
+    words: r.words,
     snippet: splitHighlights(r.snippet),
   };
 }
@@ -52,7 +59,7 @@ function toHit(r: Row): Hit {
 async function run(tsquery: string, q: string, lectureId: string | null, limit: number): Promise<Hit[]> {
   const rows = await query<Row>(
     `SELECT s.id, s.lecture_id, l.public_id, l.title, l.speaker, s.start_s, s.end_s, s.text, s.chapter_title,
-            ts_headline('english', s.text, q, $4) AS snippet
+            l.duration_s, s.words, ts_headline('english', s.text, q, $4) AS snippet
        FROM segments s
        JOIN lectures l ON l.id = s.lecture_id,
             ${tsquery} AS q

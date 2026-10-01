@@ -1,6 +1,9 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { buildSegments, MAX_SEGMENT_S, TranscriptFile } from "@/lib/segments";
+import { parseChaptersVtt } from "@/lib/chapters";
+
+import { buildSegments, MAX_SEGMENT_S, TranscriptFile, transcriptLanguage } from "@/lib/segments";
 
 // One word per second: "w0 w1 ... wN", with sentence ends where requested.
 function line(count: number, sentenceEndsAt: number[] = [], offset = 0) {
@@ -52,5 +55,25 @@ describe("buildSegments", () => {
   it("accepts both array and single-object transcript files", () => {
     expect(TranscriptFile.parse([line(2)])).toHaveLength(1);
     expect(TranscriptFile.parse(line(2))).toHaveLength(1);
+  });
+});
+
+describe("real Cloudinary output (captured in Phase 01)", () => {
+  it("segments a real transcript into 8–15 s windows with chapter titles and word timings", () => {
+    const lines = TranscriptFile.parse(JSON.parse(readFileSync("tests/fixtures/overfitting.transcript.json", "utf8")));
+    const chapters = parseChaptersVtt(readFileSync("tests/fixtures/overfitting-chapters.vtt", "utf8"));
+    const segments = buildSegments(lines, chapters);
+
+    expect(chapters.map((c) => c.title)).toEqual([
+      "Introduction to Overfitting",
+      "Understanding Regularization",
+      "Techniques to Combat Overfitting",
+      "Conclusion and Next Steps",
+    ]);
+    expect(transcriptLanguage(lines)).toBe("en");
+    expect(segments.length).toBeGreaterThanOrEqual(5);
+    for (const s of segments.slice(0, -1)) expect(s.endS - s.startS).toBeLessThanOrEqual(MAX_SEGMENT_S);
+    expect(segments.every((s) => s.words.length > 0 && s.chapterTitle)).toBe(true);
+    expect(segments.find((s) => s.text.includes("Regularization adds a penalty"))?.chapterTitle).toBe("Understanding Regularization");
   });
 });
