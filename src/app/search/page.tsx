@@ -1,0 +1,42 @@
+import type { Metadata } from "next";
+
+import { ResultCard } from "@/components/ResultCard";
+import { SearchBar } from "@/components/SearchBar";
+import { findSegments } from "@/lib/search";
+
+type Props = { searchParams: Promise<{ q?: string }> };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { q } = await searchParams;
+  return { title: q ? `${q} — Pravaha` : "Search — Pravaha" };
+}
+
+export default async function SearchPage({ searchParams }: Props) {
+  const q = ((await searchParams).q ?? "").trim().slice(0, 300);
+  const hits = q.length >= 2 ? await findSegments(q) : [];
+
+  return (
+    <div className="mt-4">
+      <SearchBar defaultValue={q} />
+
+      <section aria-labelledby="found-heading" className="mt-8">
+        <h2 id="found-heading" className="text-sm font-semibold tracking-wide text-muted uppercase">
+          Moments found
+        </h2>
+        {q.length < 2 ? (
+          <p className="mt-3 text-muted">Type at least two characters.</p>
+        ) : hits.length === 0 ? (
+          <p className="mt-3 text-muted">Nothing said matches “{q}” — try different words.</p>
+        ) : (
+          <ul className="mt-3 space-y-3">
+            {hits.map((hit) => (
+              <li key={hit.segmentId}>
+                <ResultCard hit={hit} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
