@@ -30,7 +30,8 @@ export function Player({ publicId, startAt, searchable, onTime, videoRef }: Prop
         colors={{ accent: "#2dd4bf", base: "#0e1112", text: "#ecedea" }}
         seekThumbnails
         // Chapters and subtitles come from Cloudinary's auto_chaptering / auto_transcription outputs.
-        // ponytail: `chapters: true` (auto-discovered file) is typed as object — confirm on real output in Phase 01.
+        // `chapters: true` makes the player load {public_id}-chapters.vtt (written by auto_chaptering, verified in Phase 01);
+        // the option is typed as object in the SDK, hence the cast.
         {...(searchable
           ? {
               chapters: true as unknown as object,

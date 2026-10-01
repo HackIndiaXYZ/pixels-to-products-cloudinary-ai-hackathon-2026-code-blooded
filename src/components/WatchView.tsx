@@ -60,6 +60,7 @@ export function WatchView({ lectureId, publicId, title, durationS, startAt, sear
               startS={current.startS}
               endS={current.endS}
               durationS={durationS}
+              words={current.words}
               label="Share this moment"
               className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-fg"
             />

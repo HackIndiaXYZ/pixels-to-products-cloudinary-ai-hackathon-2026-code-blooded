@@ -8,6 +8,7 @@ import { MomentButton } from "@/components/MomentButton";
 import { Snippet } from "@/components/ResultCard";
 import { formatTime } from "@/lib/format";
 import type { SnippetPart } from "@/lib/highlight";
+import type { TimedWord } from "@/lib/segments";
 import { clipUrl, thumbUrl } from "@/lib/media";
 
 type Citation = {
@@ -20,6 +21,8 @@ type Citation = {
   startS: number;
   endS: number;
   chapterTitle: string | null;
+  durationS: number | null;
+  words: TimedWord[];
   snippet: SnippetPart[];
 };
 
@@ -168,7 +171,15 @@ function CitationCard({ c }: { c: Citation }) {
         >
           Open full session
         </Link>
-        <MomentButton lectureId={c.lectureId} publicId={c.publicId} title={c.title} startS={c.startS} endS={c.endS} />
+        <MomentButton
+          lectureId={c.lectureId}
+          publicId={c.publicId}
+          title={c.title}
+          startS={c.startS}
+          endS={c.endS}
+          durationS={c.durationS}
+          words={c.words}
+        />
       </div>
     </article>
   );
