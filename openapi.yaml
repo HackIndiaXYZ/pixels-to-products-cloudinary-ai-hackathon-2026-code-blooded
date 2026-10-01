@@ -1,10 +1,13 @@
 openapi: 3.0.3
 info:
   title: Pravaha API
-  version: 0.2.0
+  version: 0.3.0
+  license: { name: MIT, url: 'https://opensource.org/licenses/MIT' }
   description: >
-    Pravaha's internal API (v2). Prose explanation of auth, validation and
+    Pravaha's internal API (v3). Prose explanation of auth, validation and
     rate-limiting decisions: docs/API.md. Every endpoint maps to an FR in docs/PRD.md.
+    Every JSON request body must be sent with Content-Type: application/json,
+    otherwise the route answers 415 (CSRF guard, docs/SECURITY.md).
 servers:
   - url: http://localhost:3000/api
     description: Local development
@@ -41,11 +44,14 @@ components:
     SearchResult:
       type: object
       properties:
+        segmentId: { type: integer }
         lectureId: { type: string, format: uuid }
+        publicId: { type: string }
         title: { type: string }
         speaker: { type: string, nullable: true }
         startS: { type: number }
         endS: { type: number }
+        text: { type: string }
         snippet:
           type: array
           description: "Plain-text parts; hit = matched term. Never HTML."
@@ -67,10 +73,81 @@ components:
         endS: { type: number }
         text: { type: string }
         momentUrl: { type: string, format: uri }
+    Reel:
+      type: object
+      nullable: true
+      description: "Answer Reel: the cited moments stitched into one Cloudinary video (≤5 clips, ≤90 s)"
+      properties:
+        url: { type: string, format: uri }
+        durationS: { type: number }
+        clips: { type: integer }
+    Moment:
+      type: object
+      properties:
+        segmentId: { type: integer }
+        startS: { type: number }
+        endS: { type: number }
+    StudyPack:
+      type: object
+      properties:
+        summary: { type: array, items: { type: string }, maxItems: 3 }
+        concepts:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Moment'
+              - { type: object, properties: { name: { type: string } } }
+        quiz:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Moment'
+              - type: object
+                properties:
+                  question: { type: string }
+                  options: { type: array, items: { type: string }, minItems: 4, maxItems: 4 }
+                  correctIndex: { type: integer, minimum: 0, maximum: 3 }
+                  explanation: { type: string }
+        highlights:
+          type: array
+          maxItems: 5
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Moment'
+              - { type: object, properties: { label: { type: string, nullable: true } } }
+    Insights:
+      type: object
+      properties:
+        totals:
+          type: object
+          properties:
+            questions: { type: integer }
+            answeredRate: { type: number, minimum: 0, maximum: 1 }
+            shares: { type: integer }
+        gaps:
+          type: array
+          items: { type: object, properties: { question: { type: string }, times: { type: integer }, lastAsked: { type: string, format: date-time } } }
+        topQuestions:
+          type: array
+          items: { type: object, properties: { question: { type: string }, times: { type: integer }, answered: { type: integer } } }
+        topMoments:
+          type: array
+          items:
+            type: object
+            properties:
+              segmentId: { type: integer }
+              lectureId: { type: string, format: uuid }
+              title: { type: string }
+              startS: { type: number }
+              text: { type: string }
+              opens: { type: integer }
+              shares: { type: integer }
 paths:
   /organizer/session:
     post:
       summary: Organizer sign-in with passcode
+      operationId: signIn
+      security: []  # public
       requestBody:
         required: true
         content:
@@ -86,11 +163,14 @@ paths:
         '401': { description: Wrong passcode, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
     delete:
       summary: Organizer sign-out
+      operationId: signOut
+      security: []  # public
       responses:
         '204': { description: Cookie cleared }
   /upload-signature:
     post:
       summary: Sign a CldUploadWidget upload for an existing lecture (allow-listed params only)
+      operationId: signUpload
       security: [{ organizerCookie: [] }]
       requestBody:
         required: true
@@ -118,6 +198,7 @@ paths:
   /webhooks/cloudinary:
     post:
       summary: Cloudinary notification (transcription complete/failed)
+      operationId: cloudinaryWebhook
       security: [{ cloudinarySignature: [] }]
       requestBody:
         required: true
@@ -131,6 +212,7 @@ paths:
   /lectures:
     post:
       summary: Create a session before upload (rights confirmation required)
+      operationId: createLecture
       security: [{ organizerCookie: [] }]
       requestBody:
         required: true
@@ -157,6 +239,8 @@ paths:
         '401': { description: Not an organizer }
     get:
       summary: List sessions (public+ready for learners; all for organizers)
+      operationId: listLectures
+      security: []  # public
       responses:
         '200':
           description: Sessions
@@ -168,11 +252,14 @@ paths:
       - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
     get:
       summary: One session (unlisted reachable by direct link)
+      operationId: getLecture
+      security: []  # public
       responses:
         '200': { description: Session, content: { application/json: { schema: { $ref: '#/components/schemas/Lecture' } } } }
         '404': { description: Not found }
     patch:
       summary: Update visibility / title / speaker
+      operationId: updateLecture
       security: [{ organizerCookie: [] }]
       requestBody:
         required: true
@@ -192,6 +279,8 @@ paths:
   /search:
     get:
       summary: Find — full-text search over spoken content
+      operationId: search
+      security: []  # public
       parameters:
         - { name: q, in: query, required: true, schema: { type: string, minLength: 2, maxLength: 200 } }
         - { name: lectureId, in: query, required: false, schema: { type: string, format: uuid } }
@@ -208,6 +297,8 @@ paths:
   /ask:
     post:
       summary: Ask — grounded answer with validated clip citations
+      operationId: ask
+      security: []  # public
       requestBody:
         required: true
         content:
@@ -229,5 +320,47 @@ paths:
                   status: { type: string, enum: [answered, not_found, fallback] }
                   answer: { type: string, nullable: true }
                   citations: { type: array, items: { $ref: '#/components/schemas/Citation' } }
+                  reel: { $ref: '#/components/schemas/Reel' }
         '400': { description: Invalid body }
         '429': { description: Rate limited (Retry-After header) }
+  /lectures/{id}/study-pack:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      summary: (Re)generate a session's Study Pack (also generated automatically after ingest)
+      operationId: generateStudyPack
+      security: [{ organizerCookie: [] }]
+      responses:
+        '200': { description: Study Pack, content: { application/json: { schema: { $ref: '#/components/schemas/StudyPack' } } } }
+        '400': { description: 'Session not ready, or too short' }
+        '401': { description: Not an organizer }
+        '404': { description: Not found }
+        '502': { description: Every model in the AI chain failed }
+        '503': { description: GEMINI_API_KEY not configured }
+  /events:
+    post:
+      summary: Anonymous Moment analytics (open / share) for organizer Insights
+      operationId: recordMomentEvent
+      security: []  # public
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [segmentId, kind]
+              properties:
+                segmentId: { type: integer, minimum: 1 }
+                kind: { type: string, enum: [open, share] }
+      responses:
+        '204': { description: Recorded }
+        '400': { description: Invalid body }
+        '404': { description: Unknown segment }
+  /insights:
+    get:
+      summary: Organizer Insights over the last 30 days (knowledge gaps, most asked, most shared)
+      operationId: getInsights
+      security: [{ organizerCookie: [] }]
+      responses:
+        '200': { description: Insights, content: { application/json: { schema: { $ref: '#/components/schemas/Insights' } } } }
+        '401': { description: Not an organizer }
