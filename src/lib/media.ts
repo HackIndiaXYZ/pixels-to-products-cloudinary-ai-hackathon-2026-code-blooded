@@ -14,6 +14,11 @@ const CAPTION_MAX_S = 1.8;
 const CAPTION_STYLE = "co_white,b_rgb:000000b3,w_660,c_fit";
 const VERTICAL_CROP = "c_fill,ar_9:16,w_720,g_auto"; // g_auto must sit in its own component, not with so_/eo_
 
+// Where a session's representative frame comes from: 10% in (past any title card), at most 30 s.
+export function posterTime(durationS: number | null | undefined): number {
+  return Math.min(30, (durationS ?? 50) * 0.1);
+}
+
 // A content-aware 16:9 frame at a moment: g_auto keeps the speaker/slide in frame instead of a blind centre crop.
 export function thumbUrl(publicId: string, atS: number, cloud = CLOUD): string {
   return `${base(cloud)}/so_${sec(atS)},c_fill,ar_16:9,w_640,g_auto/f_auto,q_auto/${publicId}.jpg`;

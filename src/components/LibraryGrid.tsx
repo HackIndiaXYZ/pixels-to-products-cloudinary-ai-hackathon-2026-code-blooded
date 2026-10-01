@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { formatTime } from "@/lib/format";
 import type { Lecture } from "@/lib/lectures";
-import { thumbUrl } from "@/lib/media";
+import { posterTime, thumbUrl } from "@/lib/media";
 
 export function LibraryGrid({ lectures }: { lectures: Lecture[] }) {
   if (!lectures.length) {
@@ -20,7 +20,7 @@ export function LibraryGrid({ lectures }: { lectures: Lecture[] }) {
           <Link href={`/watch/${l.id}`} className="group block">
             <div className="relative overflow-hidden rounded-2xl bg-border">
               <Image
-                src={thumbUrl(l.publicId, Math.min(30, (l.durationS ?? 50) * 0.1))}
+                src={thumbUrl(l.publicId, posterTime(l.durationS))}
                 alt=""
                 width={640}
                 height={360}
