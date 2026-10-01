@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { InsightsPanel } from "@/components/InsightsPanel";
 import { StatusBadge } from "@/components/StatusBadge";
 import { UploadForm } from "@/components/UploadForm";
 import { formatTime } from "@/lib/format";
@@ -18,6 +19,8 @@ type Session = {
 
 export function Studio() {
   const [sessions, setSessions] = useState<Session[] | null>(null);
+  const [view, setView] = useState<"sessions" | "insights">("sessions");
+  const [packState, setPackState] = useState<Record<string, "building" | "done" | "failed">>({});
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/lectures", { cache: "no-store" });
@@ -48,6 +51,13 @@ export function Studio() {
     if (!res.ok) refresh();
   }
 
+  // Builds (or rebuilds) a session's Study Pack: summary, concepts, quiz and highlight reel.
+  async function buildPack(id: string) {
+    setPackState((p) => ({ ...p, [id]: "building" }));
+    const res = await fetch(`/api/lectures/${id}/study-pack`, { method: "POST" });
+    setPackState((p) => ({ ...p, [id]: res.ok ? "done" : "failed" }));
+  }
+
   async function signOut() {
     await fetch("/api/organizer/session", { method: "DELETE" });
     window.location.reload();
@@ -62,11 +72,23 @@ export function Studio() {
         </button>
       </div>
 
-      <section aria-labelledby="sessions-heading">
-        <h2 id="sessions-heading" className="text-lg font-semibold">
-          Sessions
-        </h2>
-        {sessions === null ? (
+      <section aria-label="Studio views">
+        <div role="tablist" className="flex gap-1 rounded-xl border border-border bg-surface p-1 text-sm font-medium sm:w-fit">
+          {(["sessions", "insights"] as const).map((v) => (
+            <button
+              key={v}
+              role="tab"
+              aria-selected={view === v}
+              onClick={() => setView(v)}
+              className={`rounded-lg px-4 py-1.5 capitalize ${view === v ? "bg-accent text-accent-fg" : "text-muted hover:text-fg"}`}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+        {view === "insights" ? (
+          <InsightsPanel />
+        ) : sessions === null ? (
           <div className="mt-4 space-y-3">
             {[0, 1, 2].map((i) => (
               <div key={i} className="skeleton h-16" />
@@ -98,6 +120,22 @@ export function Studio() {
                   />
                   {s.visibility === "public" ? "Public" : "Unlisted"}
                 </label>
+                {s.status === "ready" && (
+                  <button
+                    type="button"
+                    onClick={() => buildPack(s.id)}
+                    disabled={packState[s.id] === "building"}
+                    className="rounded-lg border border-border px-3 py-1 text-sm hover:border-accent disabled:opacity-60"
+                  >
+                    {packState[s.id] === "building"
+                      ? "Building…"
+                      : packState[s.id] === "done"
+                        ? "Study Pack ready ✓"
+                        : packState[s.id] === "failed"
+                          ? "Retry Study Pack"
+                          : "Build Study Pack"}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
