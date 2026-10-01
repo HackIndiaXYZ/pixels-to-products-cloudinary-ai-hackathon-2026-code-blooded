@@ -17,7 +17,7 @@
     "e2e:local": "node scripts/e2e-local.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.125.0",
+    "@google/genai": "^2.25.0",
     "cloudinary": "^2.11.0",
     "next": "^16.3.4",
     "next-cloudinary": "^6.19.3",
