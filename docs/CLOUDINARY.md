@@ -29,17 +29,18 @@ Learner (browser) ◀── HLS adaptive stream · Moment clips · g_auto thumbn
 
 ## 3. Upload
 
-The Studio uses `CldUploadWidget` in **signed** mode. Before the widget opens, `POST /api/upload-signature` (organizer-only) creates the `lectures` row and signs these params server-side:
+Two steps. `POST /api/lectures` (organizer-only) creates the `lectures` row with a server-chosen `public_id = pravaha/<lecture uuid>`, so the webhook always finds its row. Then `CldUploadWidget` uploads in **signed** mode; `POST /api/upload-signature` signs only `public_id`, `upload_preset`, `timestamp`, `source` (allow-list in `src/lib/upload-policy.ts`).
+
+The Cloudinary AI work is configured on the **signed upload preset** `pravaha_signed`, not sent by the browser — so no client can add or alter it:
 
 ```
-public_id         = pravaha/<lecture uuid>      ← chosen by us, so the webhook always finds its row
-resource_type     = video
-auto_transcription = true                         (object form adds translate: ["hi-IN"] for P2) [verify P01]
-auto_chaptering   = true                          [verify P01]
-notification_url  = ${APP_URL}/api/webhooks/cloudinary
+auto_transcription = true                          (P2: translate to hi-IN) [verify P01]
+auto_chaptering    = true                          [verify P01]
+notification_url   = <APP_URL>/api/webhooks/cloudinary
+allowed formats    = mp4, mov, webm, mkv, m4v · max file size 500 MB · no folder (public_id already has one)
 ```
 
-Upload preset (signed) caps file size at 500 MB and restricts formats to video. Bytes go browser → Cloudinary; our server never sees them.
+Bytes go browser → Cloudinary; our server never sees them. If Phase 01 shows a preset can't carry `auto_chaptering`, the fallback is a server-side `explicit` call on the upload-success notification.
 
 ## 4. AI Processing
 

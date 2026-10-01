@@ -27,8 +27,10 @@ cp .env.example .env.local
    CLOUDINARY_API_SECRET=<api secret>
    ```
 3. Settings → Upload → **Add upload preset**:
-   - Name `pravaha_signed`, Signing mode **Signed**
-   - Folder `pravaha`, allowed formats `mp4,mov,webm,mkv,m4v`, max file size 500 MB
+   - Name `pravaha_signed`, Signing mode **Signed**, **no folder** (Pravaha's `public_id`s already start with `pravaha/`)
+   - Allowed formats `mp4,mov,webm,mkv,m4v`, max file size 500 MB
+   - Enable **auto transcription** and **auto chaptering** (AI / add-on section of the preset)
+   - Notification URL: `https://<your-vercel-app>/api/webhooks/cloudinary` (update it once Vercel gives you the URL)
    - `CLOUDINARY_UPLOAD_PRESET=pravaha_signed`
 4. Check the AI video features (transcription, chaptering) are available on the account; Phase 01 confirms them on a real upload.
 
