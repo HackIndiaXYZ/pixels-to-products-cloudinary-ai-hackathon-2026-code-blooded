@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 
 import { query } from "@/lib/db";
 import type { TimedWord } from "@/lib/segments";
@@ -106,3 +107,29 @@ export async function popularTopics(limit = 4): Promise<string[]> {
   );
   return rows.map((r) => r.chapter_title);
 }
+
+export type Moment = SegmentRow & { lecture: Lecture };
+
+// One segment with its session — the data behind a shared Moment page (/m/[segmentId]).
+// Reachable by link whatever the session's visibility, like /watch (you were given the link).
+// cache(): generateMetadata and the page share one query per request.
+export const getMoment = cache(async (segmentId: number): Promise<Moment | null> => {
+  const rows = await query<Row & { segment_id: string; start_s: number; end_s: number; text: string; chapter_title: string | null; words: TimedWord[] }>(
+    `SELECT ${COLUMNS.split(", ").map((c) => `l.${c}`).join(", ")},
+            s.id AS segment_id, s.start_s, s.end_s, s.text, s.chapter_title, s.words
+       FROM segments s JOIN lectures l ON l.id = s.lecture_id
+      WHERE s.id = $1`,
+    [segmentId],
+  );
+  const r = rows[0];
+  if (!r) return null;
+  return {
+    id: Number(r.segment_id),
+    startS: r.start_s,
+    endS: r.end_s,
+    text: r.text,
+    chapterTitle: r.chapter_title,
+    words: r.words,
+    lecture: toLecture(r),
+  };
+});
