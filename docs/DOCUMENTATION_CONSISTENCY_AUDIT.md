@@ -17,7 +17,7 @@ Every v2 doc cross-checked after the re-scope.
 
 ### Known leftovers
 
-- `docs/phases/` still contains the **v1 phase specs** (`PHASE-01-cloudinary-wiring.md` … `PHASE-13-demo-prep.md`). They're superseded by the v2 files (`PHASE-01-cloudinary-spike.md` … `PHASE-10-ship.md`) and should be deleted; `IMPLEMENTATION_PLAN.md` lists only v2 phases.
+- The **v1 phase specs** are archived in `docs/phases/archive-v1/` with a superseded note; `IMPLEMENTATION_PLAN.md` lists only v2 phases.
 - Items marked **[verify P01]** in `CLOUDINARY.md` are deliberate open questions, closed by Phase 01.
 
 ## Audit 1 — pre-build (v1)
