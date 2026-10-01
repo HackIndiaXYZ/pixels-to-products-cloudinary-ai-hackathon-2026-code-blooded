@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { validateAnswer } from "@/lib/citations";
-import { AskRefused, askClaude } from "@/lib/claude";
+import { AskRefused, AskUnconfigured, askClaude } from "@/lib/claude";
 import { apiError, parseJson } from "@/lib/http";
 import { log } from "@/lib/log";
 import { momentUrl } from "@/lib/media";
@@ -57,7 +57,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: result.status, answer: result.answer, citations: result.citations.map(withMoment) });
   } catch (error) {
     // NFR4: the model failing never means an error page — show the most relevant moments instead.
-    const kind = error instanceof AskRefused ? "refusal" : error instanceof Error ? error.name : "unknown";
+    const kind =
+      error instanceof AskRefused ? "refusal" : error instanceof AskUnconfigured ? "unconfigured" : error instanceof Error ? error.name : "unknown";
     log("claude.error", { kind, message: error instanceof Error ? error.message.slice(0, 200) : undefined, ms: Date.now() - started });
     const citations = hits.slice(0, FALLBACK_CLIPS).map((h, i) => withMoment({ ...h, n: i + 1 }));
     return NextResponse.json({ status: "fallback", answer: null, citations });

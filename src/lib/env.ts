@@ -7,7 +7,8 @@ const schema = z.object({
   CLOUDINARY_API_SECRET: z.string().min(1),
   CLOUDINARY_UPLOAD_PRESET: z.string().min(1).default("pravaha_signed"),
   DATABASE_URL: z.string().min(1),
-  ANTHROPIC_API_KEY: z.string().min(1),
+  // Optional: without it Ask degrades to showing the most relevant clips (NFR4) instead of breaking the app.
+  ANTHROPIC_API_KEY: z.string().optional().transform((v) => v || undefined),
   ORGANIZER_PASSCODE: z.string().min(12),
   SESSION_SECRET: z.string().min(16),
   APP_URL: z.url(),

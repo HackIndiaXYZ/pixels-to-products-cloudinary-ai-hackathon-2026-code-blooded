@@ -36,10 +36,13 @@ function excerpts(hits: Hit[]): string {
 }
 
 export class AskRefused extends Error {}
+export class AskUnconfigured extends Error {}
 
 // One call: question + retrieved excerpts in, schema-validated { answer, cited_segment_ids } out.
 export async function askClaude(question: string, hits: Hit[]): Promise<RawAnswer> {
-  client ??= new Anthropic({ apiKey: env().ANTHROPIC_API_KEY });
+  const apiKey = env().ANTHROPIC_API_KEY;
+  if (!apiKey) throw new AskUnconfigured("ANTHROPIC_API_KEY is not set");
+  client ??= new Anthropic({ apiKey });
   const response = await client.beta.messages.parse(
     {
       model: ASK_MODEL,
