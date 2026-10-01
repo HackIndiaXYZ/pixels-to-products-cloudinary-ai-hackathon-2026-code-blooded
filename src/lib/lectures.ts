@@ -1,6 +1,7 @@
 import "server-only";
 
 import { query } from "@/lib/db";
+import type { TimedWord } from "@/lib/segments";
 
 export type LectureStatus = "processing" | "ready" | "transcript_failed";
 export type Visibility = "unlisted" | "public";
@@ -82,14 +83,14 @@ export async function updateLecture(
   return rows[0] ? toLecture(rows[0]) : null;
 }
 
-export type SegmentRow = { id: number; startS: number; endS: number; text: string; chapterTitle: string | null };
+export type SegmentRow = { id: number; startS: number; endS: number; text: string; chapterTitle: string | null; words: TimedWord[] };
 
 export async function getSegments(lectureId: string): Promise<SegmentRow[]> {
-  const rows = await query<{ id: string; start_s: number; end_s: number; text: string; chapter_title: string | null }>(
-    `SELECT id, start_s, end_s, text, chapter_title FROM segments WHERE lecture_id = $1 ORDER BY start_s`,
+  const rows = await query<{ id: string; start_s: number; end_s: number; text: string; chapter_title: string | null; words: TimedWord[] }>(
+    `SELECT id, start_s, end_s, text, chapter_title, words FROM segments WHERE lecture_id = $1 ORDER BY start_s`,
     [lectureId],
   );
-  return rows.map((r) => ({ id: Number(r.id), startS: r.start_s, endS: r.end_s, text: r.text, chapterTitle: r.chapter_title }));
+  return rows.map((r) => ({ id: Number(r.id), startS: r.start_s, endS: r.end_s, text: r.text, chapterTitle: r.chapter_title, words: r.words }));
 }
 
 // The library's most-covered chapter topics — used as "try asking" chips on the home page.
