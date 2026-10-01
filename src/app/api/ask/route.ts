@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { validateAnswer } from "@/lib/citations";
-import { AskRefused, AskUnconfigured, askClaude } from "@/lib/claude";
+import { AiUnconfigured } from "@/lib/ai";
+import { askGrounded } from "@/lib/answer";
 import { apiError, parseJson } from "@/lib/http";
 import { log } from "@/lib/log";
-import { momentUrl } from "@/lib/media";
+import { momentUrl, reelUrl } from "@/lib/media";
 import { clientIp, takeAskToken } from "@/lib/rate-limit";
 import { retrieveForQuestion, type Hit } from "@/lib/search";
 
@@ -22,6 +23,10 @@ const withMoment = (h: Hit & { n: number }) => ({
   ...h,
   momentUrl: momentUrl(h.publicId, h.startS, h.endS, { durationS: h.durationS, words: h.words }),
 });
+
+// Answer Reel: every cited moment, across sessions, stitched into one video in citation order.
+const reelFor = (hits: Hit[]) =>
+  reelUrl(hits.map((h) => ({ publicId: h.publicId, startS: h.startS, endS: h.endS, label: h.speaker ?? h.title })));
 
 export async function POST(request: Request) {
   const started = Date.now();
@@ -46,7 +51,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = validateAnswer(await askClaude(question, hits), hits);
+    const result = validateAnswer(await askGrounded(question, hits), hits);
     log("ask.done", {
       status: result.status,
       retrieved: hits.length,
@@ -54,13 +59,17 @@ export async function POST(request: Request) {
       dropped: result.dropped,
       ms: Date.now() - started,
     });
-    return NextResponse.json({ status: result.status, answer: result.answer, citations: result.citations.map(withMoment) });
+    return NextResponse.json({
+      status: result.status,
+      answer: result.answer,
+      citations: result.citations.map(withMoment),
+      reel: reelFor(result.citations),
+    });
   } catch (error) {
     // NFR4: the model failing never means an error page — show the most relevant moments instead.
-    const kind =
-      error instanceof AskRefused ? "refusal" : error instanceof AskUnconfigured ? "unconfigured" : error instanceof Error ? error.name : "unknown";
-    log("claude.error", { kind, message: error instanceof Error ? error.message.slice(0, 200) : undefined, ms: Date.now() - started });
+    const kind = error instanceof AiUnconfigured ? "unconfigured" : error instanceof Error ? error.name : "unknown";
+    log("ai.error", { kind, message: error instanceof Error ? error.message.slice(0, 200) : undefined, ms: Date.now() - started });
     const citations = hits.slice(0, FALLBACK_CLIPS).map((h, i) => withMoment({ ...h, n: i + 1 }));
-    return NextResponse.json({ status: "fallback", answer: null, citations });
+    return NextResponse.json({ status: "fallback", answer: null, citations, reel: reelFor(citations) });
   }
 }

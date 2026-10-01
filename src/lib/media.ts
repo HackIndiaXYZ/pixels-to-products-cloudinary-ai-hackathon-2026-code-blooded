@@ -88,3 +88,47 @@ export function clipUrl(publicId: string, startS: number, endS: number, cloud = 
   const { start, end } = momentWindow(startS, endS);
   return `${base(cloud)}/so_${start},eo_${end}/f_auto:video,q_auto/${publicId}.mp4`;
 }
+
+export type ReelClip = { publicId: string; startS: number; endS: number; label?: string };
+
+export const REEL_MAX_CLIPS = 5;
+export const REEL_MAX_S = 90;
+const REEL_FRAME = "w_1280,h_720,c_fill"; // every clip scaled to one frame size so sessions of any resolution splice cleanly
+const REEL_LABEL = "co_white,b_rgb:0f766ecc";
+
+// An Answer Reel: the cited moments — from any number of sessions — stitched into ONE video with
+// Cloudinary's fl_splice, each clip labelled with its speaker. Verified on real output (Phase 12).
+// Labels are timed on the final reel's timeline, so each appears exactly while its clip plays.
+export function reelUrl(clips: ReelClip[], cloud = CLOUD): { url: string; durationS: number; clips: number } | null {
+  const windows: (ReelClip & { start: number; end: number })[] = [];
+  let total = 0;
+  for (const clip of clips.slice(0, REEL_MAX_CLIPS)) {
+    const { start, end } = momentWindow(clip.startS, clip.endS);
+    if (total + (end - start) > REEL_MAX_S) break;
+    windows.push({ ...clip, start, end });
+    total += end - start;
+  }
+  const [first, ...rest] = windows;
+  if (!first) return null;
+
+  const parts = [`so_${first.start},eo_${first.end},${REEL_FRAME}`];
+  for (const clip of rest) {
+    parts.push(`l_video:${clip.publicId.replaceAll("/", ":")},fl_splice`, `so_${clip.start},eo_${clip.end},${REEL_FRAME}`, "fl_layer_apply");
+  }
+  let offset = 0;
+  for (const clip of windows) {
+    const length = sec(clip.end - clip.start);
+    if (clip.label) {
+      parts.push(
+        `l_text:arial_34_bold:${encodeLayerText(clip.label)},${REEL_LABEL}`,
+        `fl_layer_apply,g_north_west,x_40,y_40,so_${sec(offset)},eo_${sec(offset + length)}`,
+      );
+    }
+    offset += length;
+  }
+  return {
+    url: [base(cloud), ...parts, "f_auto:video,q_auto", `${first.publicId}.mp4`].join("/"),
+    durationS: sec(offset),
+    clips: windows.length,
+  };
+}

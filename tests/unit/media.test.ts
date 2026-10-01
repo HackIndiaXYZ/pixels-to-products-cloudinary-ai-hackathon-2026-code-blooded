@@ -7,6 +7,7 @@ import {
   MOMENT_MAX_S,
   momentUrl,
   momentWindow,
+  reelUrl,
   thumbUrl,
   trackingWarmupUrl,
 } from "@/lib/media";
@@ -93,5 +94,41 @@ describe("Cloudinary URLs (compositions verified on real output in Phase 01)", (
     expect(clipUrl(ID, 10, 20, CLOUD)).toBe(`${V}/so_8.5,eo_21.5/f_auto:video,q_auto/${ID}.mp4`);
     expect(thumbUrl(ID, 12.345, CLOUD)).toBe(`${V}/so_12.3,c_fill,ar_16:9,w_640,g_auto/f_auto,q_auto/${ID}.jpg`);
     expect(trackingWarmupUrl(ID, CLOUD)).toBe(`${V}/so_0,eo_1/c_fill,ar_9:16,w_90,g_auto/q_auto/${ID}.mp4`);
+  });
+});
+
+describe("reelUrl (Answer Reels, verified on real output)", () => {
+  const A = "pravaha/aaaaaaaa-0000-4000-8000-000000000001";
+  const B = "pravaha/bbbbbbbb-0000-4000-8000-000000000002";
+
+  it("splices clips from different sessions into one video with timed speaker labels", () => {
+    const reel = reelUrl(
+      [
+        { publicId: A, startS: 26.5, endS: 29.5, label: "Prof. David · Overfitting" },
+        { publicId: B, startS: 61.5, endS: 64.5, label: "Dr. Zira" },
+      ],
+      CLOUD,
+    );
+    expect(reel).toEqual({
+      url:
+        `${V}/so_25,eo_31,w_1280,h_720,c_fill/` +
+        `l_video:pravaha:bbbbbbbb-0000-4000-8000-000000000002,fl_splice/so_60,eo_66,w_1280,h_720,c_fill/fl_layer_apply/` +
+        `l_text:arial_34_bold:Prof.%20David%20%C2%B7%20Overfitting,co_white,b_rgb:0f766ecc/fl_layer_apply,g_north_west,x_40,y_40,so_0,eo_6/` +
+        `l_text:arial_34_bold:Dr.%20Zira,co_white,b_rgb:0f766ecc/fl_layer_apply,g_north_west,x_40,y_40,so_6,eo_12/` +
+        `f_auto:video,q_auto/${A}.mp4`,
+      durationS: 12,
+      clips: 2,
+    });
+  });
+
+  it("caps the reel at 5 clips and 90 seconds", () => {
+    const many = Array.from({ length: 8 }, (_, i) => ({ publicId: A, startS: i * 100, endS: i * 100 + 25 }));
+    const reel = reelUrl(many, CLOUD)!;
+    expect(reel.clips).toBe(3); // 28 s each → the 4th would pass 90 s
+    expect(reel.durationS).toBeLessThanOrEqual(90);
+  });
+
+  it("returns null with no clips", () => {
+    expect(reelUrl([], CLOUD)).toBeNull();
   });
 });

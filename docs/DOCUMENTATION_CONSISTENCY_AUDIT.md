@@ -9,7 +9,7 @@ Every v2 doc cross-checked after the re-scope.
 | Every FR in `PRD.md` has an endpoint in `API.md` / `openapi.yaml` and a phase in `IMPLEMENTATION_PLAN.md` | Consistent |
 | `DATABASE.md` schema matches the queries described in `API.md`, `AI_EVALUATION.md`, phase docs | Consistent (3 tables) |
 | Env vars in `.env.example` = `SECURITY.md` secrets table = `SETUP.md` | Consistent |
-| Claude scope (Ask only, `claude-opus-5-5`) identical in `TRD.md`, `DECISIONS.md`, `AI_EVALUATION.md`, `COST.md`, Phase 08 | Consistent |
+| AI layer = Gemini with a model fallback chain (`src/lib/ai.ts`) in `TRD.md`, `DECISIONS.md`, `AI_EVALUATION.md`, `COST.md`, `SECURITY.md`, `SETUP.md`, Phase 11 (Phase 08 records the original Claude design) | Consistent (Oct 1, v3) |
 | Chaptering = Cloudinary `auto_chaptering` everywhere; no remaining custom-algorithm references in v2 docs | Consistent |
 | FTS config = `english` in `DATABASE.md` and `DECISIONS.md` | Consistent |
 | Auth = passcode cookie in `TRD.md`, `SECURITY.md`, `API.md`, `ARCHITECTURE.md`, Phase 03 | Consistent |

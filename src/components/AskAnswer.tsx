@@ -26,9 +26,11 @@ type Citation = {
   snippet: SnippetPart[];
 };
 
+type Reel = { url: string; durationS: number; clips: number } | null;
+
 type AskResponse =
-  | { status: "answered"; answer: string; citations: Citation[] }
-  | { status: "not_found" | "fallback"; answer: null; citations: Citation[] };
+  | { status: "answered"; answer: string; citations: Citation[]; reel: Reel }
+  | { status: "not_found" | "fallback"; answer: null; citations: Citation[]; reel?: Reel };
 
 type State = { kind: "loading" } | { kind: "error"; message: string } | { kind: "done"; data: AskResponse };
 
@@ -86,6 +88,7 @@ function AnswerBody({ data }: { data: AskResponse }) {
       {data.status === "fallback" && (
         <p className="mt-3 text-muted">Here are the most relevant moments.</p>
       )}
+      {data.reel && data.reel.clips > 1 && <AnswerReel reel={data.reel} />}
       {data.citations.length > 0 && (
         <ol className="mt-5 grid gap-3 md:grid-cols-2">
           {data.citations.map((c) => (
@@ -96,6 +99,29 @@ function AnswerBody({ data }: { data: AskResponse }) {
         </ol>
       )}
     </>
+  );
+}
+
+// The cited moments stitched into one video by Cloudinary — watch the whole answer, across sessions.
+function AnswerReel({ reel }: { reel: NonNullable<Reel> }) {
+  const [playing, setPlaying] = useState(false);
+  if (playing) {
+    return <video src={reel.url} className="mt-5 aspect-video w-full rounded-2xl bg-black" controls autoPlay playsInline />;
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => setPlaying(true)}
+      className="mt-5 flex w-full items-center gap-4 rounded-2xl border border-accent/40 bg-accent/10 p-4 text-left hover:bg-accent/15"
+    >
+      <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent text-accent-fg">▶</span>
+      <span>
+        <span className="block font-semibold">Watch the answer</span>
+        <span className="text-sm text-muted">
+          {reel.clips} moments stitched into one <span className="tabular">{formatTime(reel.durationS)}</span> video
+        </span>
+      </span>
+    </button>
   );
 }
 

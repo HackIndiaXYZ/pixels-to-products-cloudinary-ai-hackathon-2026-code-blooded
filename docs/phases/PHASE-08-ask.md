@@ -1,5 +1,7 @@
 # Phase 08 — Ask
 
+> **Update (Phase 11):** the model call moved from Claude to Gemini (`src/lib/ai.ts`, `src/lib/answer.ts`). Retrieval, citation validation, rate limits and fallback below are unchanged.
+
 **Day 3 morning · ~4 h**
 
 ## Objective

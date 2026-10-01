@@ -76,6 +76,7 @@ Lowercase, kebab-case, describes the feature — not a person or a date.
 - Merge only when: CI (lint, typecheck, unit tests) is green and the Vercel preview deploy works for the changed flow.
 - **Merge commit** (`gh pr merge --merge`) — keeps each feature's commits and a "Merge pull request #n" commit on `main`, and keeps follow-up branches mergeable without rewriting history. Delete the branch after merge.
 - One feature in flight at a time: branch from a fresh `main`, PR, CI green, merge, then start the next. No stacked PRs.
+- **A PR is opened only when the branch has at least 20 changed files.** Smaller work keeps accumulating on the branch, so related phases ship together. Branch names describe the feature (`feature/gemini-answer-reels`), never a phase number.
 
 ## Keeping `main` Healthy
 

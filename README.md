@@ -16,7 +16,7 @@ Colleges, clubs and coaching institutes record hundreds of hours of lectures and
 |---|---|
 | **Watch** | Upload a raw recording. Cloudinary transcribes it, chapters it and streams it adaptively. No editing. |
 | **Find** | Search every session for what was *said* and land on the exact second. |
-| **Ask** | Ask a question in plain language. Get an answer grounded **only** in your recordings, where every claim is a **playable clip** of the moment it came from. If the library doesn't cover it, Pravaha says so. |
+| **Ask** | Ask a question in plain language. Get an answer grounded **only** in your recordings, where every claim is a **playable clip** of the moment it came from. Plus an **Answer Reel**: the cited moments from different lecturers stitched into one video. If the library doesn't cover it, Pravaha says so. |
 | **Moments** | One tap turns any cited clip into a vertical, AI-cropped, subtitled short for WhatsApp or Instagram. No render pipeline: the short is a Cloudinary URL. |
 
 *ChatGPT gives you text. Pravaha gives you the moment your professor said it.*
@@ -31,6 +31,7 @@ Colleges, clubs and coaching institutes record hundreds of hours of lectures and
 | Cloudinary Video Player (HLS) | Adaptive streaming that survives slow mobile data |
 | `so_`/`eo_` + `c_fill,ar_9:16,g_auto` + `l_subtitles` + `f_auto,q_auto` | **Moments**: trimmed, subject-tracked, subtitled vertical clips |
 | `g_auto` thumbnails | Content-aware library and result frames |
+| `l_video:…,fl_splice` + timed `l_text` labels | **Answer Reels**: cited moments from several sessions stitched into one labelled video |
 | Webhooks (`notification_url`) | Upload → `ready` with no polling |
 
 **What we built on top:** transcript → time-coded segment indexing, library-wide retrieval and ranking (Postgres FTS), grounded Ask with server-side citation validation and refusal, the Moment URL composer, and the learner and organizer experience. Detail: [`docs/CLOUDINARY.md`](docs/CLOUDINARY.md).
@@ -40,10 +41,10 @@ Colleges, clubs and coaching institutes record hundreds of hours of lectures and
 ```
 Studio ──signed upload──▶ Cloudinary ──webhook──▶ Next.js API ──▶ Postgres (segments + FTS)
 Learner ◀── HLS · Moments · thumbnails ── Cloudinary CDN
-Learner ──question──▶ API ──retrieve──▶ Postgres ──top segments──▶ Claude ──validated citations──▶ clips
+Learner ──question──▶ API ──retrieve──▶ Postgres ──top segments──▶ Gemini ──validated citations──▶ clips + Answer Reel
 ```
 
-One Next.js app (frontend + API) on Vercel · Neon Postgres · Cloudinary · Claude (Ask only). Diagrams: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+One Next.js app (frontend + API) on Vercel · Neon Postgres · Cloudinary · Gemini (grounded AI with a model fallback chain). Diagrams: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## How to Test It
 
@@ -77,7 +78,7 @@ pnpm install && cp .env.example .env.local && pnpm dev
 
 ## Stack
 
-Next.js 16 (App Router, TypeScript) · Tailwind CSS · `next-cloudinary` + `cloudinary` · Postgres (Neon) · Claude API · Vercel
+Next.js 16 (App Router, TypeScript) · Tailwind CSS · `next-cloudinary` + `cloudinary` · Postgres (Neon) · Gemini (`@google/genai`) · Vercel
 
 ## License
 

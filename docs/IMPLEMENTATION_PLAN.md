@@ -73,3 +73,21 @@ Secrets scan · cold test on someone else's phone · Cloudinary feedback survey 
 - **Deployed every evening.** A working unpolished build beats a polished broken one.
 - **Docs follow code:** when reality diverges from a phase doc, update the doc in the same change (`CLAUDE.md`).
 - **No commits/pushes without the team lead's go-ahead** during this build.
+
+---
+
+## v3 — Expansion (from Oct 1 evening)
+
+The core loop (Phases 01–09) is built and verified on real Cloudinary + Neon. v3 makes Pravaha a bigger, more defensible product, with every addition built on the same two engines: **Cloudinary transformations** and **one schema-validated, citation-grounded AI call**.
+
+| # | Phase | What it adds | Status |
+|---|---|---|---|
+| 11 | Gemini AI layer | Provider switch to Gemini, model fallback chain, Zod → JSON schema | ✅ done |
+| 12 | Answer Reels | Every answer becomes one video stitched from the cited moments across sessions (`fl_splice`) | ✅ done |
+| 13 | Study Packs | Summary, concepts, a quiz whose explanations play the clip, "Session in 60 seconds" reel | next |
+| 14 | Learner Insights | Knowledge gaps (unanswered questions → what to record next), most asked, most shared | |
+| 15 | Multilingual | Hindi subtitles (Cloudinary translate) + ask in Hindi, answer from English lectures | |
+| 16 | Share cards & deploy | Cloudinary OG images, branded Moment pages `/m/[id]`, Vercel production | |
+| 17 | Launch | Real library, eval, e2e on production, README, demo, submission | |
+
+**PR policy (team lead, Oct 1):** a PR is opened only once a feature branch carries **at least 20 changed files**, so related phases ship together (`GIT_WORKFLOW.md`).
