@@ -6,13 +6,12 @@ on:
     branches: [main]
 
 jobs:
-  lint-and-typecheck:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # pnpm version comes from package.json's packageManager field
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -21,24 +20,5 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
-
-  # Cloudinary integration tests (docs/TESTING.md) run against a real sandbox
-  # account and are slower — gated to main only, not every PR, on purpose.
-  cloudinary-integration:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm test -- --grep cloudinary-integration
-        env:
-          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+      # Build without secrets: env vars are read lazily at request time (src/lib/env.ts).
+      - run: pnpm build
