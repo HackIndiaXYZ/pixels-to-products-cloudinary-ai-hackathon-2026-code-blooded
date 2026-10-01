@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "eval:ask": "node scripts/eval-ask.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",

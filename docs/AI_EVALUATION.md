@@ -10,10 +10,10 @@ Two kinds of AI run in Pravaha:
 | Stage | Detail |
 |---|---|
 | **Input** | Learner's question (3–300 chars), optional `lectureId` scope |
-| **Retrieval** | Postgres FTS over `segments` (public + ready sessions): OR-ed stemmed terms, `ts_rank_cd`, top 12. Each hit is expanded with its previous and next segment for context (~30 s window), de-duplicated |
+| **Retrieval** | Postgres FTS over `segments` (public + ready sessions): OR-ed stemmed terms, `ts_rank_cd`, top 12 (`retrieveForQuestion`). No retrieved segments → `not_found` without calling the model. *Neighbour expansion (±1 segment) is deferred — add it if eval answers lack context.* |
 | **Context** | System prompt (below) + numbered sources: `[S812] (Session: "Intro to ML", speaker: Dr. Rao, 12:34–12:45) <text>` |
-| **Model** | `claude-sonnet-5-5`, `max_tokens` 600, temperature 0, 15 s timeout |
-| **Output** | Structured JSON via tool/JSON-schema output: `{ "answer": string, "cited_segment_ids": number[] }`, answer uses `[S812]`-style markers |
+| **Model** | `claude-opus-5-5`, effort `low` (thinking is always on for this model; low keeps a short grounded answer fast), `max_tokens` 4000, 20 s timeout, 1 retry, server-side refusal fallback (`fallbacks: "default"`) |
+| **Output** | Structured output via `client.beta.messages.parse` + `betaZodOutputFormat` (schema-validated by the SDK): `{ "answer": string, "cited_segment_ids": number[] }`, answer uses `[S812]`-style markers |
 | **Validation** | (1) parse against Zod schema; (2) drop every cited ID not in the retrieved set; (3) drop `[S…]` markers in the text that weren't validated; (4) renumber surviving citations `[1]..[n]` in order of appearance; (5) if **zero** valid citations → `not_found` |
 | **Action** | Return answer + citation cards; each card carries a `momentUrl` built from the segment's times |
 
@@ -29,11 +29,11 @@ Two kinds of AI run in Pravaha:
 
 ### Fallback (NFR4)
 
-Claude error, timeout, or schema failure → `status: "fallback"`, no generated text, top 4 retrieved segments shown as clip cards with a "Showing the most relevant moments" label. Ask never shows an error page because the LLM is down.
+Claude error, timeout, refusal (after the server-side fallback model also declines), or schema failure → `status: "fallback"`, no generated text, top 4 retrieved segments shown as clip cards with a "Showing the most relevant moments" label. Ask never shows an error page because the LLM is down.
 
 ### Cost & latency
 
-~12 sources × ~60 words ≈ 1.5–2.5k input tokens, ≤600 output. One call per question, capped at 20/hour per IP and 500/day globally, plus a spend cap in the Anthropic console. Target p50 < 5 s end to end; the UI streams a skeleton with the retrieved clip cards first (they're ready before Claude answers).
+~12 sources × ~30 words ≈ 1–2k input tokens; short output plus low-effort thinking. One call per question, capped at 20/hour per IP and 500/day globally, plus a spend cap in the Anthropic console. Target p50 < 5 s end to end; the UI streams a skeleton with the retrieved clip cards first (they're ready before Claude answers).
 
 ## Evaluation — a real, small harness
 

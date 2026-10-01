@@ -18,7 +18,7 @@ Phase 00 done; repo connected to `origin` (HackIndia team repo). v2 re-scope don
 
 ## Decisions already made (don't relitigate without a real reason)
 
-- **Stack:** one Next.js 16 app (App Router, TypeScript, pnpm, Tailwind) containing frontend and backend. Neon Postgres via raw `pg`. Cloudinary via `cloudinary` + `next-cloudinary` (Upload Widget, Video Player). Claude (`claude-sonnet-5-5`) for **Ask only**. Organizer passcode cookie, not NextAuth. Vercel.
+- **Stack:** one Next.js 16 app (App Router, TypeScript, pnpm, Tailwind) containing frontend and backend. Neon Postgres via raw `pg`. Cloudinary via `cloudinary` + `next-cloudinary` (Upload Widget, Video Player). Claude (`claude-opus-5-5`, effort `low`) for **Ask only**. Organizer passcode cookie, not NextAuth. Vercel.
 - **Cloudinary does the media AI:** `auto_transcription`, `auto_chaptering`, Video Player (HLS), `g_auto`, `l_subtitles`, trims, `f_auto/q_auto`. Never rebuild what Cloudinary ships natively. That was v1's mistake (`docs/DECISIONS.md`).
 - **What's genuinely ours:** transcript → segment indexing (`src/lib/segments.ts`), library-wide retrieval, grounded Ask with server-side citation validation and refusal (`src/lib/citations.ts`), the Moment URL composer (`src/lib/media.ts`), and the UX.
 - **Anti-overengineering is a real constraint:** no separate Python service, no vector DB, no ORM, no Terraform, no `develop` branch. Needing one of these is a signal to re-read `docs/DECISIONS.md`, not a green light.

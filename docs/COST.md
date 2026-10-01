@@ -5,7 +5,7 @@ Every figure is tagged **ACTUAL** (by design / confirmed plan mechanics), **ESTI
 | Service | Tier | Tag | Notes |
 |---|---|---|---|
 | Cloudinary | Free — 25 credits/month (1 credit ≈ 1,000 transformations or 1 GB storage or 1 GB bandwidth) | **ESTIMATE** | Heavy items: transcription per minute of video, video derivatives (Moments, HLS renditions). Library of ~8 × 10-min sessions + a few dozen Moments should fit; usage checked daily in the console (Phase 01 records the real burn of one upload) |
-| Anthropic (Claude Sonnet 5.5) | Pay-as-you-go | **ASSUMPTION** | ~2–3k tokens per Ask; a few hundred Asks during build + judging. Hard-bounded by the app rate limits (20/h/IP, 500/day) **and** a monthly spend limit set in the Anthropic console |
+| Anthropic (Claude Opus 5.5, effort low) | Pay-as-you-go | **ASSUMPTION** | ~2–3k tokens per Ask (≈ $4 / $20 per MTok in/out); a few hundred Asks during build + judging. Hard-bounded by the app rate limits (20/h/IP, 500/day) **and** a monthly spend limit set in the Anthropic console |
 | Neon Postgres | Free | **ESTIMATE** | Thousands of segment rows ≈ a few MB |
 | Vercel | Hobby | **ESTIMATE** | Demo traffic is tiny; Ask's 15 s Claude timeout fits within Hobby function limits |
 | Media storage elsewhere | None | **ACTUAL** | All media lives in Cloudinary |
