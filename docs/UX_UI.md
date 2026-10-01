@@ -9,6 +9,7 @@ Rule: make the intelligence visible, hide the machinery. Learners see answers, m
 | `/` | Everyone | Hero Ask bar + library grid |
 | `/search?q=` | Everyone | Ask answer on top, Find results below |
 | `/watch/[id]?t=` | Everyone (unlisted by link) | Player, chapters, transcript, share moment |
+| `/m/[segmentId]` | Everyone (unlisted by link, `noindex`) | A shared Moment: vertical clip, quote, full session, Ask bar; designed link preview |
 | `/studio` | Organizer | Passcode → upload → manage sessions |
 
 ## Home `/`

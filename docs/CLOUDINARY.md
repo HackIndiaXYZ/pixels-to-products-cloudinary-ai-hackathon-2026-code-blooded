@@ -75,6 +75,21 @@ Why not `l_subtitles:{id}.transcript`: it renders only with an explicit font, an
 
 A `.jpg` frame from the video at the moment (`so_<t>,c_fill,ar_16:9,w_640,g_auto/f_auto,q_auto`), verified working. Content-aware framing instead of a blind centre crop.
 
+## 7a. Share Cards (Open Graph)
+
+Every Moment and session link previews as a designed card that Cloudinary builds from the video itself (`shareCardUrl()`, verified on real output):
+
+```
+so_<t>,c_fill,w_1200,h_630,g_auto/                   frame at the moment, framed on the subject
+e_gradient_fade:symmetric_pad,y_-0.5,b_black/        darken top and bottom for text; the speaker stays bright
+l_text:arial_30_bold:Pravaha,co_white,b_rgb:0f766e/fl_layer_apply,g_north_west,x_60,y_56/
+l_text:arial_60_bold:<title>,co_white,w_1080,c_fit/fl_layer_apply,g_south_west,x_60,y_130/
+l_text:arial_34:<speaker · time>,co_rgb:99f6e4/fl_layer_apply,g_south_west,x_60,y_70/
+f_jpg,q_auto/<public_id>.jpg
+```
+
+Without Cloudinary this is an image-rendering service (a headless browser or canvas) plus storage for every card.
+
 ## 8. Metadata
 
 Tags: `pravaha` on every upload (makes the console filterable). Context: `title`, `speaker`. Structured metadata deliberately unused (free-plan field cap; Postgres holds what the app queries).

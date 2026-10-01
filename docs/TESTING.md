@@ -14,6 +14,7 @@ Scope: the things that would embarrass the product in front of a judge or corrup
 | `study-pack.test.ts` | Study Packs are grounded: ungrounded concepts/questions dropped, malformed questions dropped, highlights deduped and ordered |
 | `media.test.ts` (reels) | Answer Reels: cross-session splice, timed labels, 5-clip / 90 s caps |
 | `segments.test.ts` (real fixture) | A real Cloudinary transcript segments into 8–15 s windows with chapters and word timings |
+| `media.test.ts` (share cards) | Open Graph cards: exact composition, no subtitle layer when absent, long titles truncated |
 | `highlight.test.ts` | Snippets are plain-text parts — `<script>` in a transcript stays inert |
 | `webhook-signature.test.ts` | Bad/missing/stale signature rejected before parsing |
 

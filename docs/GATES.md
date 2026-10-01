@@ -7,13 +7,13 @@ Status: **PASS**, **NEEDS WORK**, **BLOCKED**, or **NOT STARTED**. A blocked cri
 | 1 — Hackathon understanding | **PASS** | Re-verified against the live page Oct 1 (`STRATEGY_REVISIT.md`, Revisit 2) |
 | 2 — Track selection | **PASS** | Track 3 — least crowded (27 teams), examples match a media-centric startup; Track 1's video mention noted and weighed |
 | 3 — Idea selection | **PASS (v2)** | Re-scoped to Watch · Find · Ask · Moments after finding Cloudinary ships native chaptering |
-| 4 — Idea validation | **NEEDS WORK** | Transcription quality on our accents is unverified until Phase 01 (Day 1, hour 2) |
+| 4 — Idea validation | **NEEDS WORK** | Pipeline verified on two synthetic (TTS) sessions; transcription on our own speakers' accents is still unverified (first real recording, Phase 17) |
 | 5 — Product definition | **PASS** | `PRD.md` v2, `VISION.md` |
 | 6 — PRD | **PASS** | Consistent with all v2 docs (`DOCUMENTATION_CONSISTENCY_AUDIT.md`) |
 | 7 — Technical architecture | **PASS** | `TRD.md`, `ARCHITECTURE.md`, `DATABASE.md`, `API.md`, `CLOUDINARY.md` |
-| 8 — MVP | **NOT STARTED** | Phases 01–08; Day 1 evening gate is the first checkpoint |
-| 9 — Testing | **NOT STARTED** | Phase 09 |
-| 10 — Deployment | **NOT STARTED** | First deploy in Phase 02 (Day 1) |
+| 8 — MVP | **PASS** | Phases 01–14 built and verified locally against real Cloudinary + Neon + Gemini; Phase 16 code done |
+| 9 — Testing | **NEEDS WORK** | Lint, typecheck, 55 unit tests and build green; eval and Playwright smoke need production and the real library |
+| 10 — Deployment | **NEXT** | Runbook in `SETUP.md` §7 (Phase 16) |
 | 11 — Demo | **NOT STARTED** | Script ready (`DEMO.md`); recorded Day 3 evening |
 | 12 — Submission | **NOT STARTED** | Day 4, `SUBMISSION_CHECKLIST.md` |
 

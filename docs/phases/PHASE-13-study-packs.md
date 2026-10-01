@@ -13,7 +13,7 @@ Every session gets a **Study Pack**, generated automatically once transcription 
 It turns a passive recording into active revision, and it's the strongest coaching-institute selling point (`VISION.md`). Every AI output is grounded in segment ids and validated like Ask, so the quiz can't invent what the lecture never said.
 
 ## Design
-- **When:** after ingest, via Next's `after()` so the webhook still returns fast; generated lazily on first view if missing
+- **When:** after ingest, via Next's `after()` so the webhook still returns fast; or on demand with **Build Study Pack** in the Studio (e.g. sessions ingested before Study Packs existed). *Deliberately not generated on page view:* that would let any visitor trigger paid AI calls.
 - **Model call:** `generateJson(StudyPack)` with the session's segments as `<excerpt id="S…">`. Schema: `{ summary: string[3], concepts: [{ name, segment_id }], quiz: [{ question, options[4], correct_index, explanation, segment_id }], highlight_segment_ids: number[≤5] }`
 - **Validation (pure, tested):** drop concepts/questions whose `segment_id` isn't in the session; fewer than 3 valid questions → no quiz; highlights deduplicated and kept in timeline order
 - **Storage:** `study_packs (lecture_id PK, pack JSONB, model, created_at)` (migration 003)
