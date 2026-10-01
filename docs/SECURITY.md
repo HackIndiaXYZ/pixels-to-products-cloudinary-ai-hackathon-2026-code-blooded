@@ -6,7 +6,7 @@
 |---|---|---|
 | Studio + organizer API | Anyone on the internet | Passcode → signed cookie |
 | `/api/webhooks/cloudinary` | Anyone on the internet | Cloudinary signature over raw body + timestamp freshness |
-| `/api/ask` | Anyone; costs money per call | Zod validation, per-IP + global rate limit, Anthropic spend cap |
+| `/api/ask` | Anyone; costs money per call | Zod validation, per-IP + global rate limit, Gemini billing budget alert |
 | `/api/search`, lecture reads | Anyone | Zod validation, parameterized SQL, public+ready filter |
 | Claude | Untrusted transcript text inside the prompt | No tools, schema output, citation validation |
 
@@ -25,7 +25,8 @@
 | `NEXT_PUBLIC_CLOUDINARY_API_KEY` | Public (useless without a signature) |
 | `CLOUDINARY_API_SECRET` | **Server-only** — signs uploads, verifies webhooks |
 | `DATABASE_URL` | Server-only |
-| `ANTHROPIC_API_KEY` | Server-only |
+| `GEMINI_API_KEY` | Server-only (optional: Ask degrades to clips without it) |
+| `GEMINI_MODELS` | Config (comma-separated model chain) |
 | `ORGANIZER_PASSCODE`, `SESSION_SECRET` | Server-only |
 | `APP_URL` | Config (webhook URL base) |
 
@@ -49,7 +50,7 @@ Covered in `AI_EVALUATION.md`: no tools, schema-only output, citations limited t
 
 ## Abuse & Cost Controls
 
-- `/api/ask`: 20/hour per IP hash, 500/day global (Postgres `ask_requests`), `429` + `Retry-After`. Anthropic console monthly spend limit set during setup.
+- `/api/ask`: 20/hour per IP hash, 500/day global (Postgres `ask_requests`), `429` + `Retry-After`. A Gemini billing budget alert is set during setup.
 - Moments: bounded to ≤ 60 s clips at 720 p — a learner can't request a full-length derived video.
 - Cloudinary usage checked daily during the build.
 

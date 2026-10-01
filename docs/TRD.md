@@ -33,7 +33,7 @@ Detailed in `CLOUDINARY.md`. Summary: signed upload, `auto_transcription`, `auto
 
 ## AI
 
-**Claude (`claude-opus-5-5`, effort `low`, server-side refusal fallback) for Ask only.** Input: the question + the top ~12 retrieved transcript segments (with IDs). Output: structured JSON — an answer with inline `[n]` markers and the list of segment IDs it cites. The server **rejects any cited ID that wasn't in the retrieved set**; if nothing valid remains, the response is a refusal, not an answer. Full spec: `AI_EVALUATION.md`.
+**Gemini via `@google/genai` (`src/lib/ai.ts`), with a model fallback chain `gemini-3.6-flash → gemini-3.1-flash-lite → gemini-3.5-flash-lite`.** Used for Ask and, from Phase 13, Study Packs. Input: the question + the top ~12 retrieved transcript segments (with IDs). Output: structured JSON (`responseJsonSchema` derived from the validating Zod schema): an answer with inline `[n]` markers and the list of segment IDs it cites. The server **rejects any cited ID that wasn't in the retrieved set**; if nothing valid remains, the response is a refusal, not an answer. Full spec: `AI_EVALUATION.md`.
 *Why Claude is narrow:* Cloudinary does the media understanding (speech-to-text, chaptering, cropping). Claude does the one thing Cloudinary doesn't: reason across many transcripts to answer a question. That split is the honest answer to "what's AI here?"
 *Removed from v1:* chapter-title cleanup (Cloudinary's `auto_chaptering` produces titles) and query normalization (Postgres `plainto_tsquery` with OR-ed terms handles natural-language queries).
 
@@ -68,4 +68,4 @@ GitHub Actions: lint, typecheck, unit tests on every push/PR.
 
 ## Cost
 
-Every service has a sufficient free tier; Claude cost is bounded by the Ask rate limits plus an Anthropic console spend cap. `COST.md`.
+Every service has a sufficient free tier; Gemini cost is bounded by the Ask rate limits plus a billing budget alert. `COST.md`.

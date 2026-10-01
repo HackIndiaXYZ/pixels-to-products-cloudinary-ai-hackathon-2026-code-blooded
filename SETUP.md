@@ -40,9 +40,9 @@ cp .env.example .env.local
 2. Copy the **pooled** connection string → `DATABASE_URL`.
 3. Neon SQL Editor → paste and run `migrations/001_init.sql` (created in Phase 03), or `psql "$DATABASE_URL" -f migrations/001_init.sql`.
 
-## 4. Anthropic
+## 4. Google Gemini
 
-1. `console.anthropic.com` → API Keys → create → `ANTHROPIC_API_KEY`.
+1. aistudio.google.com → **Get API key** → create → `GEMINI_API_KEY`. Optional: `GEMINI_MODELS` overrides the model chain.
 2. Settings → Limits → set a **monthly spend limit** (Ask is public; this is the second cost cap after the app's rate limits).
 
 ## 5. Organizer Secrets
