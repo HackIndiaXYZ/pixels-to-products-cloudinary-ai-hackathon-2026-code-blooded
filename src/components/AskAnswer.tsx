@@ -205,6 +205,7 @@ function CitationCard({ c }: { c: Citation }) {
           endS={c.endS}
           durationS={c.durationS}
           words={c.words}
+          segmentId={c.segmentId}
         />
       </div>
     </article>

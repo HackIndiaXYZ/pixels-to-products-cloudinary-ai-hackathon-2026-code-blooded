@@ -44,6 +44,7 @@ export default async function SearchPage({ searchParams }: Props) {
                       endS={hit.endS}
                       durationS={hit.durationS}
                       words={hit.words}
+                      segmentId={hit.segmentId}
                     />
                   </div>
                 </ResultCard>

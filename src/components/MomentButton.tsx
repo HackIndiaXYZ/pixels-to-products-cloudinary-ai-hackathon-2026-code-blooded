@@ -15,13 +15,14 @@ type Props = {
   endS: number;
   durationS?: number | null;
   words?: TimedWord[];
+  segmentId?: number;
   label?: string;
   className?: string;
 };
 
 // "Share as Moment": a vertical, AI-cropped, subtitled clip of exactly this moment, shared as a link.
 // Native <dialog> + Web Share API — no modal or share library.
-export function MomentButton({ publicId, lectureId, title, startS, endS, durationS, words, label, className }: Props) {
+export function MomentButton({ publicId, lectureId, title, startS, endS, durationS, words, segmentId, label, className }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
   const openRef = useRef(false);
   const [src, setSrc] = useState<string | null>(null);
@@ -47,7 +48,19 @@ export function MomentButton({ publicId, lectureId, title, startS, endS, duratio
     if (openRef.current) setSrc(url);
   }
 
+  // Anonymous analytics for organizer Insights ("Moments that travel"); fire-and-forget.
+  function track(kind: "open" | "share") {
+    if (!segmentId) return;
+    void fetch("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ segmentId, kind }),
+      keepalive: true,
+    }).catch(() => {});
+  }
+
   function show() {
+    track("open");
     setState("loading");
     setCopied(false);
     setSrc(null);
@@ -57,6 +70,7 @@ export function MomentButton({ publicId, lectureId, title, startS, endS, duratio
   }
 
   async function share() {
+    track("share");
     const text = `${title} — at ${formatTime(startS)}. Full session: ${window.location.origin}${sessionPath}`;
     if (navigator.share) {
       try {
