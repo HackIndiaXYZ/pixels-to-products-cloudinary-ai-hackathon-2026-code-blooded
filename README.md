@@ -17,6 +17,8 @@ Colleges, clubs and coaching institutes record hundreds of hours of lectures and
 | **Watch** | Upload a raw recording. Cloudinary transcribes it, chapters it and streams it adaptively. No editing. |
 | **Find** | Search every session for what was *said* and land on the exact second. |
 | **Ask** | Ask a question in plain language. Get an answer grounded **only** in your recordings, where every claim is a **playable clip** of the moment it came from. Plus an **Answer Reel**: the cited moments from different lecturers stitched into one video. If the library doesn't cover it, Pravaha says so. |
+| **Study Packs** | Every session gets a summary, key concepts, a quiz whose every explanation **plays the moment** the teacher explains it, and a "Session in 60 seconds" highlight reel. All generated automatically and grounded in the transcript. |
+| **Insights** | Organizers see what learners ask, the **knowledge gaps** the library can't answer yet (what to record next), and which Moments get shared. |
 | **Moments** | One tap turns any cited clip into a vertical, AI-cropped, subtitled short for WhatsApp or Instagram. No render pipeline: the short is a Cloudinary URL. |
 
 *ChatGPT gives you text. Pravaha gives you the moment your professor said it.*

@@ -69,3 +69,9 @@ Rights confirmation is required before upload (`rights_confirmed_at`), sessions 
 | XSS | No raw HTML except escaped `<b>` in snippets |
 | Security misconfiguration | Signed upload preset; secrets server-only |
 | Vulnerable deps | `pnpm audit` in CI, Dependabot |
+
+## v3 additions
+
+- **Learner privacy in Insights:** `ask_log` keeps question text only (no IP, no user); `moment_events` keeps segment id + kind. Insights are organizer-only (`401` otherwise).
+- **`/api/events`** is public but only counts events against existing segments (`404` otherwise) and stores no identity. Worst-case abuse is inflated share counts, not data exposure.
+- **Study Pack prompt injection:** same containment as Ask: schema-only output, and every reference validated against the session's real segment ids.

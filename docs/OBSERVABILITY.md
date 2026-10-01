@@ -27,3 +27,14 @@ Never logged: transcript text, questions verbatim (only length), IPs, secrets.
 ## Error tracking, tracing, monitoring
 
 Vercel's function logs and analytics. No Sentry, no tracing backend — `lectureId` on every line is the trace at this scale. Considered and declined, not forgotten.
+
+## v3 events
+
+| Event | Fields |
+|---|---|
+| `ai.done` / `ai.model_failed` | `task` (ask, study_pack), `model`, `ms`, `error` |
+| `study_pack.done` / `study_pack.failed` | `lectureId`, `model`, `concepts`, `quiz`, `highlights` |
+| `moment.warmup` | `lectureId`, `status` (Cloudinary tracking-crop pre-warm) |
+| `insights.log_failed` | `error` |
+
+`ai.model_failed` followed by `ai.done` on another model is the fallback chain working; a run of `ai.model_failed` across the whole chain means the provider is down (Ask is then serving clips).

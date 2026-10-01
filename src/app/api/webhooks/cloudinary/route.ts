@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { env } from "@/lib/env";
@@ -6,7 +6,11 @@ import { apiError } from "@/lib/http";
 import { ingestTranscript, markTranscriptFailed, setDuration } from "@/lib/ingest";
 import { getLectureByPublicId } from "@/lib/lectures";
 import { log } from "@/lib/log";
+import { generateStudyPackSafely } from "@/lib/study-packs";
 import { verifyCloudinaryWebhook } from "@/lib/webhook-signature";
+
+// Ingest is fast; the Study Pack (one AI call) runs after the response within this budget.
+export const maxDuration = 60;
 
 const Payload = z.looseObject({
   public_id: z.string().optional(),
@@ -62,6 +66,7 @@ export async function POST(request: Request) {
     const isChaptering = body.info_kind === "auto_chaptering";
     if ((isTranscription || (isChaptering && lecture.status === "ready")) && body.info_status === "complete") {
       await ingestTranscript(lecture);
+      if (isTranscription) after(() => generateStudyPackSafely(lecture));
     } else if (isTranscription && body.info_status === "failed") {
       await markTranscriptFailed(lecture);
     }

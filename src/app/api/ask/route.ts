@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { validateAnswer } from "@/lib/citations";
 import { AiUnconfigured } from "@/lib/ai";
 import { askGrounded } from "@/lib/answer";
 import { apiError, parseJson } from "@/lib/http";
+import { logAsk } from "@/lib/insights";
 import { log } from "@/lib/log";
 import { momentUrl, reelUrl } from "@/lib/media";
 import { clientIp, takeAskToken } from "@/lib/rate-limit";
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
   if (hits.length === 0) {
     // Nothing in the library matches — no reason to call the model.
     log("ask.done", { status: "not_found", retrieved: 0, cited: 0, dropped: 0, ms: Date.now() - started });
+    after(() => logAsk(question, "not_found", []));
     return NextResponse.json({ status: "not_found", answer: null, citations: [] });
   }
 
@@ -59,6 +61,7 @@ export async function POST(request: Request) {
       dropped: result.dropped,
       ms: Date.now() - started,
     });
+    after(() => logAsk(question, result.status, result.citations.map((c) => c.lectureId)));
     return NextResponse.json({
       status: result.status,
       answer: result.answer,
@@ -70,6 +73,7 @@ export async function POST(request: Request) {
     const kind = error instanceof AiUnconfigured ? "unconfigured" : error instanceof Error ? error.name : "unknown";
     log("ai.error", { kind, message: error instanceof Error ? error.message.slice(0, 200) : undefined, ms: Date.now() - started });
     const citations = hits.slice(0, FALLBACK_CLIPS).map((h, i) => withMoment({ ...h, n: i + 1 }));
+    after(() => logAsk(question, "fallback", citations.map((c) => c.lectureId)));
     return NextResponse.json({ status: "fallback", answer: null, citations, reel: reelFor(citations) });
   }
 }
