@@ -18,7 +18,7 @@ Every v2 doc cross-checked after the re-scope.
 ### Known leftovers
 
 - The **v1 phase specs** are archived in `docs/phases/archive-v1/` with a superseded note; `IMPLEMENTATION_PLAN.md` lists only v2 phases.
-- Items marked **[verify P01]** in `CLOUDINARY.md` are deliberate open questions, closed by Phase 01.
+- All **[verify P01]** items in `CLOUDINARY.md` were closed on Oct 1 against real Cloudinary output (Phase 01 findings).
 
 ## Audit 1 — pre-build (v1)
 

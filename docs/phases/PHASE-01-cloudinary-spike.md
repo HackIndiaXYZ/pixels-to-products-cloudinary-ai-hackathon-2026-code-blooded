@@ -48,5 +48,23 @@ Manual: a human reads the transcript and watches the Moment.
 ## Definition of Done
 No **[verify P01]** markers remain in `CLOUDINARY.md`. If transcription quality is bad, the team decides (re-record with a better mic, or set `original_language`) **today**.
 
-## Findings
-_Fill in during the spike._
+## Findings — Oct 1, 2026 (real account `de6u9w9oz`, Free plan)
+
+Test media: two synthetic lectures (Windows TTS voices, ~80 s each, overlapping ML topics), uploaded through the real signed preset with `scripts/spike.mjs`. Raw outputs are saved as fixtures in `tests/fixtures/`.
+
+| Assumption | Result |
+|---|---|
+| Region supports transcription | ✅ The account works, so no Asia-Pacific problem |
+| `auto_transcription` + `auto_chaptering` on a **signed upload preset** | ✅ Preset `pravaha_signed` accepts both; uploads through it get both |
+| Speed | ✅ Both `complete` within **15 s** for an 82 s video |
+| Transcript file | ✅ `raw/upload/{public_id}.transcript`: JSON array of `{ transcript, confidence, words[{word,start_time,end_time}], alternatives, language }`. Punctuation is attached to words (`"club."`), which our sentence-cut regex relies on |
+| Chapters file | ✅ `raw/upload/{public_id}-chapters.vtt`, standard WebVTT with numbered cues and AI titles ("Understanding Regularization"…) |
+| `upload` response | `info.auto_transcription.status` and `info.auto_chaptering.status` are `pending`, then `complete` (Admin API) |
+| `l_subtitles:{id}.transcript` overlay | ⚠️ Renders **only with an explicit font** (`l_subtitles:arial_40:…`), and is timed against the **output** timeline, so a trimmed Moment drifts (seen on extracted frames). **Replaced** with one timed `l_text` layer per 4-word caption card (`so_`/`eo_` relative to the clip), which is exact by construction |
+| `g_auto` on video | ⚠️ Must be in **its own component** (`so_…,g_auto` → `400 g_auto must be in a transformation component by itself`). The first request per asset returns **`423 Video tracking-crop is pending`** (about 45 s for 82 s of video), then 200 |
+| `g_auto` thumbnails (`.jpg` from video) | ✅ Works inline with `so_` |
+| Credits | About 0.2 of 25 after all tests |
+
+**Code changes from these findings** (`feature/verified-media-pipeline`): word timings stored per segment (`migrations/002`), timed caption cards in `momentUrl()`, `g_auto` split into its own component, tracking-crop pre-warmed at ingest, Moment sheet waits through `423`, and transcript language stored per session.
+
+Still to confirm in a browser: `CldVideoPlayer` `chapters: true` auto-discovery of `{id}-chapters.vtt`.
