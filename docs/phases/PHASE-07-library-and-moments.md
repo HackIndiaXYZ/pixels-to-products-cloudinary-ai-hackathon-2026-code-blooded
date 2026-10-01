@@ -38,3 +38,10 @@ Given any search result, "Share as Moment" produces a vertical subtitled clip of
 
 ## Definition of Done
 **Day 2 evening gate met.** Library has 5–8 real published sessions.
+
+## As Built (diverged from the spec above)
+- `MomentSheet` became `MomentButton` — a native `<dialog>` that mounts the clip `<video>` only when opened (opening is what triggers Cloudinary to generate the derivative), plus `navigator.share` with a copy-link fallback.
+- The publish toggle and `PATCH /api/lectures/:id` shipped earlier, in Phase 03, because the Studio needed them.
+- The P1 interactive transcript (`WatchView`) shipped here: it follows playback, you click a line to seek, and you can filter within the session.
+- Home topic chips come from the library's most-covered chapter titles (`popularTopics()`), not hard-coded examples.
+- `clipUrl()` (16:9 trimmed clip) was added for inline citation playback in Phase 08.

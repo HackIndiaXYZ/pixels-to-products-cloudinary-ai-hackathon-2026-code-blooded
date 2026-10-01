@@ -81,3 +81,27 @@ export async function updateLecture(
   );
   return rows[0] ? toLecture(rows[0]) : null;
 }
+
+export type SegmentRow = { id: number; startS: number; endS: number; text: string; chapterTitle: string | null };
+
+export async function getSegments(lectureId: string): Promise<SegmentRow[]> {
+  const rows = await query<{ id: string; start_s: number; end_s: number; text: string; chapter_title: string | null }>(
+    `SELECT id, start_s, end_s, text, chapter_title FROM segments WHERE lecture_id = $1 ORDER BY start_s`,
+    [lectureId],
+  );
+  return rows.map((r) => ({ id: Number(r.id), startS: r.start_s, endS: r.end_s, text: r.text, chapterTitle: r.chapter_title }));
+}
+
+// The library's most-covered chapter topics — used as "try asking" chips on the home page.
+export async function popularTopics(limit = 4): Promise<string[]> {
+  const rows = await query<{ chapter_title: string }>(
+    `SELECT s.chapter_title
+       FROM segments s JOIN lectures l ON l.id = s.lecture_id
+      WHERE l.status = 'ready' AND l.visibility = 'public' AND s.chapter_title IS NOT NULL
+      GROUP BY s.chapter_title
+      ORDER BY count(*) DESC, s.chapter_title
+      LIMIT $1`,
+    [limit],
+  );
+  return rows.map((r) => r.chapter_title);
+}

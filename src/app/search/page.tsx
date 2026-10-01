@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { MomentButton } from "@/components/MomentButton";
 import { ResultCard } from "@/components/ResultCard";
 import { SearchBar } from "@/components/SearchBar";
 import { findSegments } from "@/lib/search";
@@ -31,7 +32,17 @@ export default async function SearchPage({ searchParams }: Props) {
           <ul className="mt-3 space-y-3">
             {hits.map((hit) => (
               <li key={hit.segmentId}>
-                <ResultCard hit={hit} />
+                <ResultCard hit={hit}>
+                  <div className="mt-2">
+                    <MomentButton
+                      lectureId={hit.lectureId}
+                      publicId={hit.publicId}
+                      title={hit.title}
+                      startS={hit.startS}
+                      endS={hit.endS}
+                    />
+                  </div>
+                </ResultCard>
               </li>
             ))}
           </ul>
