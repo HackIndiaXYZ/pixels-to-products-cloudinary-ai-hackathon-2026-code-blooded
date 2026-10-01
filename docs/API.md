@@ -53,7 +53,7 @@ JSON in, JSON out. Errors: `{ "error": { "code": string, "message": string } }`.
 ### `GET /api/search?q=&lectureId=`
 - **Auth:** public. Searches `ready` + `public` sessions; with `lectureId`, that one session (unlisted allowed — you have the link)
 - **Validation:** `q` 2–200 chars
-- **Response:** `{ "results": [{ lectureId, title, speaker, startS, endS, snippetHtml, chapterTitle }] }` — `snippetHtml` from `ts_headline` with only `<b>` tags, everything else escaped
+- **Response:** `{ "results": [{ segmentId, lectureId, publicId, title, speaker, startS, endS, text, chapterTitle, snippet: [{ text, hit }] }] }` — `ts_headline` marks matches with sentinel characters that are split into plain-text parts (`src/lib/highlight.ts`), so transcript text is never rendered as HTML
 - **Errors:** `400`
 
 ### `POST /api/ask`

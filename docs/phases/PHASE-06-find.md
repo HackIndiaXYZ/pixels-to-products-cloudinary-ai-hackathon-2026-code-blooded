@@ -14,12 +14,12 @@ Phase 05 (segments exist).
 ## Tasks
 1. `src/lib/search.ts` — `findSegments(q, {lectureId?, limit})` using `websearch_to_tsquery('english', $1)`, `ts_rank_cd`, `ts_headline` (StartSel `<b>`, StopSel `</b>`, MaxWords 24), public+ready filter unless scoped to a lecture.
 2. `GET /api/search` with Zod validation.
-3. `src/lib/html.ts` — escape snippet HTML, then restore only `<b>`/`</b>`.
+3. `src/lib/highlight.ts` — split sentinel-marked `ts_headline` output into plain-text parts (no HTML rendering at all — safer than escape-and-restore).
 4. Results UI (`/search?q=` "Moments found" list): session title, speaker, timestamp chip, highlighted snippet, chapter title → link `/watch/<id>?t=<startS>`.
 5. Empty state: "Nothing said matches — try different words, or Ask."
 
 ## Files to Create
-`src/lib/search.ts`, `src/lib/html.ts`, `src/app/api/search/route.ts`, `src/app/search/page.tsx`, `src/components/ResultCard.tsx`, `tests/unit/html.test.ts`
+`src/lib/search.ts`, `src/lib/highlight.ts`, `src/app/api/search/route.ts`, `src/app/search/page.tsx`, `src/components/ResultCard.tsx`, `tests/unit/highlight.test.ts`
 
 ## Cloudinary Requirements
 Result cards show a small `g_auto` frame at the segment start (same helper as Phase 07 thumbnails).

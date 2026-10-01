@@ -46,7 +46,14 @@ components:
         speaker: { type: string, nullable: true }
         startS: { type: number }
         endS: { type: number }
-        snippetHtml: { type: string, description: "HTML-escaped; only <b> tags allowed" }
+        snippet:
+          type: array
+          description: "Plain-text parts; hit = matched term. Never HTML."
+          items:
+            type: object
+            properties:
+              text: { type: string }
+              hit: { type: boolean }
         chapterTitle: { type: string, nullable: true }
     Citation:
       type: object

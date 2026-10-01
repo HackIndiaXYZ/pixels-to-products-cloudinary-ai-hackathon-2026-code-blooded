@@ -11,7 +11,7 @@ Scope: the things that would embarrass the product in front of a judge or corrup
 | `citations.test.ts` | "Every claim is a real moment" — unknown IDs dropped, renumbering, zero → `not_found`, malformed → fallback |
 | `media.test.ts` | Moments — padding, clamping, 60 s cap, exact URL |
 | `auth.test.ts` | Organizer cookie — valid, tampered, expired |
-| `html.test.ts` | Snippet escaping — `<script>` in a transcript stays inert |
+| `highlight.test.ts` | Snippets are plain-text parts — `<script>` in a transcript stays inert |
 | `webhook-signature.test.ts` | Bad/missing/stale signature rejected before parsing |
 
 ## End-to-End (Playwright, `tests/e2e/smoke.spec.ts`)
@@ -42,5 +42,5 @@ Transcript quality on real accents; Moment playback on iOS Safari + Android Chro
 | Question not in library | Eval set (3 questions) → `not_found` |
 | Rate limiting | Manual: 21 Asks in an hour → `429` |
 | Prompt injection in transcript | Eval: a session where the speaker says "ignore your instructions" — answer still cites real segments only |
-| XSS via transcript | `html.test.ts` |
+| XSS via transcript | `highlight.test.ts` |
 | Slow network | DevTools Slow 3G — manual |
