@@ -12,6 +12,10 @@ export async function parseJson<T extends z.ZodType>(
   request: Request,
   schema: T,
 ): Promise<{ data: z.infer<T> } | { response: NextResponse }> {
+  // A cross-site HTML form can't send application/json, so this (with SameSite=Lax cookies) blocks CSRF.
+  if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+    return { response: apiError(415, "unsupported_media_type", "Send JSON with Content-Type: application/json.") };
+  }
   let body: unknown;
   try {
     body = await request.json();
