@@ -16,13 +16,18 @@ JSON in, JSON out. Errors: `{ "error": { "code": string, "message": string } }`.
 ### `DELETE /api/organizer/session` — sign out
 - Clears the cookie. `204`.
 
-### `POST /api/upload-signature`
+### `POST /api/lectures` — create a session (step 1 of upload)
 - **Auth:** organizer
 - **Request:** `{ "title": string(1–140), "speaker"?: string(≤80), "rightsConfirmed": true }`
-- **Effect:** inserts `lectures` row (`processing`, `unlisted`, `rights_confirmed_at = now()`), then signs the upload params
-- **Response:** `{ "lectureId", "signature", "timestamp", "apiKey", "cloudName", "params": { public_id, auto_transcription, auto_chaptering, notification_url, ... } }`
+- **Effect:** inserts `lectures` row (`processing`, `unlisted`, `rights_confirmed_at = now()`) with server-chosen `public_id = pravaha/<id>`
+- **Response:** `201 { "lecture": Lecture, "uploadPreset": string }`
 - **Errors:** `400` (incl. `rightsConfirmed` not `true`) · `401`
-- **Note:** `CldUploadWidget`'s `signatureEndpoint` contract signs whatever params the widget sends; our route ignores client-sent `public_id`/`notification_url` and signs only server-chosen values
+
+### `POST /api/upload-signature` — sign the widget upload (step 2)
+- **Auth:** organizer
+- **Contract:** `CldUploadWidget`'s `signatureEndpoint`: `{ "paramsToSign": {...} }` in, `{ "signature" }` out
+- **Policy (`src/lib/upload-policy.ts`):** only the keys `public_id`, `upload_preset`, `timestamp`, `source`; preset must be ours; `public_id` must be an existing `processing` lecture; timestamp within 10 min. The AI params (`auto_transcription`, `auto_chaptering`, `notification_url`) live in the **signed upload preset**, so a client can't add or change them.
+- **Errors:** `400` unsignable / unknown lecture · `401`
 
 ### `POST /api/webhooks/cloudinary`
 - **Auth:** Cloudinary signature — `X-Cld-Signature` + `X-Cld-Timestamp` over the raw body, checked before parsing; timestamp older than 2 h rejected
@@ -39,10 +44,10 @@ JSON in, JSON out. Errors: `{ "error": { "code": string, "message": string } }`.
 ### `PATCH /api/lectures/:id`
 - **Auth:** organizer
 - **Request:** `{ "visibility"?: "public" | "unlisted", "title"?: string, "speaker"?: string }`
-- **Errors:** `400` · `401` · `404`
+- **Errors:** `400` (incl. publishing a session that isn't `ready`) · `401` · `404`
 
 ### `GET /api/lectures`
-- **Auth:** public → `ready` + `public` only; organizer → all, with status
+- **Auth:** public → `ready` + `public` only; organizer → all, with status (the Studio polls this every 5 s while anything is processing)
 - **Response:** `[{ id, title, speaker, status, visibility, durationS, publicId, createdAt }]`
 
 ### `GET /api/search?q=&lectureId=`

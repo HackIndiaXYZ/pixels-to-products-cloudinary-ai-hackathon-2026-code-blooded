@@ -16,7 +16,7 @@ Phases 01, 02. Neon database created and **`migrations/001_init.sql` applied now
 2. `src/lib/db.ts` — one pooled `pg.Pool`, a tiny `query<T>()` helper.
 3. `src/lib/auth.ts` — `checkPasscode()`, `issueOrgCookie()`, `isOrganizer(request)` (HMAC, timing-safe, expiry).
 4. `POST/DELETE /api/organizer/session`.
-5. `POST /api/upload-signature` — validates body, inserts lecture, returns signed params with server-chosen `public_id = pravaha/<uuid>`, `auto_transcription`, `auto_chaptering`, `notification_url`, `upload_preset`. Uses `cloudinary.utils.api_sign_request`.
+5. `POST /api/lectures` creates the row (server-chosen `public_id = pravaha/<uuid>`); `POST /api/upload-signature` implements the widget's `signatureEndpoint` contract and signs only an allow-listed param set for an existing `processing` lecture (`src/lib/upload-policy.ts`). AI params live on the signed preset. *(Diverged from the original spec — the widget only signs what it sends, so the preset is the tamper-proof place for them.)*
 6. `/studio` page: passcode form (if not organizer) → upload form (title, speaker, **rights checkbox required**) → `CldUploadWidget` (signed, video only) with real progress → on success, the row appears with a `processing` badge.
 7. Studio list: `GET /api/lectures` (organizer view), status badges, polling every 5 s while anything is `processing`.
 
@@ -24,7 +24,7 @@ Phases 01, 02. Neon database created and **`migrations/001_init.sql` applied now
 `migrations/001_init.sql`, `src/lib/db.ts`, `src/lib/auth.ts`, `src/lib/cloudinary.ts`, `src/app/api/organizer/session/route.ts`, `src/app/api/upload-signature/route.ts`, `src/app/api/lectures/route.ts`, `src/app/studio/page.tsx`, `src/components/UploadForm.tsx`, `src/components/StatusBadge.tsx`
 
 ## Cloudinary Requirements
-Signed upload via preset; server-chosen `public_id`; `auto_transcription` + `auto_chaptering` + `notification_url` signed server-side (Phase 01's confirmed param shapes).
+Signed upload via the `pravaha_signed` preset, which carries `auto_transcription`, `auto_chaptering` and `notification_url`; server-chosen `public_id`.
 
 ## AI Requirements
 None.

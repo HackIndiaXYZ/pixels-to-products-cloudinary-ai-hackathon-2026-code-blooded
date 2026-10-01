@@ -83,7 +83,7 @@ paths:
         '204': { description: Cookie cleared }
   /upload-signature:
     post:
-      summary: Create a lecture and sign its direct-to-Cloudinary upload
+      summary: Sign a CldUploadWidget upload for an existing lecture (allow-listed params only)
       security: [{ organizerCookie: [] }]
       requestBody:
         required: true
@@ -91,26 +91,22 @@ paths:
           application/json:
             schema:
               type: object
-              required: [title, rightsConfirmed]
+              required: [paramsToSign]
               properties:
-                title: { type: string, minLength: 1, maxLength: 140 }
-                speaker: { type: string, maxLength: 80 }
-                rightsConfirmed: { type: boolean, enum: [true] }
+                paramsToSign:
+                  type: object
+                  description: "Only public_id, upload_preset, timestamp, source"
+                  additionalProperties: true
       responses:
         '200':
-          description: Signed upload parameters
+          description: Signature
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  lectureId: { type: string, format: uuid }
                   signature: { type: string }
-                  timestamp: { type: integer }
-                  apiKey: { type: string }
-                  cloudName: { type: string }
-                  params: { type: object, additionalProperties: true }
-        '400': { description: Invalid body }
+        '400': { description: Unsignable params or unknown lecture }
         '401': { description: Not an organizer }
   /webhooks/cloudinary:
     post:
@@ -126,6 +122,32 @@ paths:
         '401': { description: Invalid or stale signature — no side effects }
         '500': { description: DB write failed — Cloudinary retries }
   /lectures:
+    post:
+      summary: Create a session before upload (rights confirmation required)
+      security: [{ organizerCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, rightsConfirmed]
+              properties:
+                title: { type: string, minLength: 1, maxLength: 140 }
+                speaker: { type: string, maxLength: 80 }
+                rightsConfirmed: { type: boolean, enum: [true] }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lecture: { $ref: '#/components/schemas/Lecture' }
+                  uploadPreset: { type: string }
+        '400': { description: Invalid body }
+        '401': { description: Not an organizer }
     get:
       summary: List sessions (public+ready for learners; all for organizers)
       responses:
