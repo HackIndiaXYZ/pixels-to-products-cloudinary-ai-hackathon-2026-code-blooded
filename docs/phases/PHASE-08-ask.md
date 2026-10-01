@@ -13,7 +13,7 @@ Phases 06 (retrieval), 07 (`momentUrl`, MomentSheet). `ANTHROPIC_API_KEY` set; A
 
 ## Tasks
 1. `src/lib/retrieve.ts` — OR-ed tsquery, top 12, ±1 neighbour expansion, de-dupe.
-2. `src/lib/claude.ts` — one call to `claude-sonnet-5-5` with the system prompt from `AI_EVALUATION.md`, structured output `{ answer, cited_segment_ids }`, 15 s timeout.
+2. `src/lib/claude.ts` — one `client.beta.messages.parse` call to `claude-opus-5-5` (effort `low`, `fallbacks: "default"`) with the system prompt from `AI_EVALUATION.md`, structured output `{ answer, cited_segment_ids }` via `betaZodOutputFormat`, 20 s timeout. *(Model revised from Sonnet 5.5 — see DECISIONS.md.)*
 3. `src/lib/citations.ts` — **pure** `validateAnswer(raw, retrievedIds) → { status, answer, citations }`: schema check, drop unknown IDs, strip unvalidated markers, renumber `[1]..[n]`, zero survivors → `not_found`.
 4. `src/lib/rate-limit.ts` — Postgres `ask_requests` check + insert (20/h per IP hash, 500/day global).
 5. `POST /api/ask` — validate → rate-limit → retrieve (none → `not_found` without calling Claude) → Claude → validate → attach `momentUrl` per citation. Claude failure → `fallback` with top 4 segments.

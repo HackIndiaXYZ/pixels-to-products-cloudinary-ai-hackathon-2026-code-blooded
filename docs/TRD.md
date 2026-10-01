@@ -33,7 +33,7 @@ Detailed in `CLOUDINARY.md`. Summary: signed upload, `auto_transcription`, `auto
 
 ## AI
 
-**Claude (`claude-sonnet-5-5`) for Ask only.** Input: the question + the top ~12 retrieved transcript segments (with IDs). Output: structured JSON — an answer with inline `[n]` markers and the list of segment IDs it cites. The server **rejects any cited ID that wasn't in the retrieved set**; if nothing valid remains, the response is a refusal, not an answer. Full spec: `AI_EVALUATION.md`.
+**Claude (`claude-opus-5-5`, effort `low`, server-side refusal fallback) for Ask only.** Input: the question + the top ~12 retrieved transcript segments (with IDs). Output: structured JSON — an answer with inline `[n]` markers and the list of segment IDs it cites. The server **rejects any cited ID that wasn't in the retrieved set**; if nothing valid remains, the response is a refusal, not an answer. Full spec: `AI_EVALUATION.md`.
 *Why Claude is narrow:* Cloudinary does the media understanding (speech-to-text, chaptering, cropping). Claude does the one thing Cloudinary doesn't: reason across many transcripts to answer a question. That split is the honest answer to "what's AI here?"
 *Removed from v1:* chapter-title cleanup (Cloudinary's `auto_chaptering` produces titles) and query normalization (Postgres `plainto_tsquery` with OR-ed terms handles natural-language queries).
 
