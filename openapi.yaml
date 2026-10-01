@@ -1,0 +1,204 @@
+openapi: 3.0.3
+info:
+  title: Pravaha API
+  version: 0.2.0
+  description: >
+    Pravaha's internal API (v2). Prose explanation of auth, validation and
+    rate-limiting decisions: docs/API.md. Every endpoint maps to an FR in docs/PRD.md.
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+components:
+  securitySchemes:
+    organizerCookie:
+      type: apiKey
+      in: cookie
+      name: pravaha_org
+    cloudinarySignature:
+      type: apiKey
+      in: header
+      name: X-Cld-Signature
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+    Lecture:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        speaker: { type: string, nullable: true }
+        status: { type: string, enum: [processing, ready, transcript_failed] }
+        visibility: { type: string, enum: [unlisted, public] }
+        durationS: { type: number, nullable: true }
+        publicId: { type: string }
+        createdAt: { type: string, format: date-time }
+    SearchResult:
+      type: object
+      properties:
+        lectureId: { type: string, format: uuid }
+        title: { type: string }
+        speaker: { type: string, nullable: true }
+        startS: { type: number }
+        endS: { type: number }
+        snippetHtml: { type: string, description: "HTML-escaped; only <b> tags allowed" }
+        chapterTitle: { type: string, nullable: true }
+    Citation:
+      type: object
+      properties:
+        n: { type: integer }
+        segmentId: { type: integer }
+        lectureId: { type: string, format: uuid }
+        title: { type: string }
+        speaker: { type: string, nullable: true }
+        startS: { type: number }
+        endS: { type: number }
+        text: { type: string }
+        momentUrl: { type: string, format: uri }
+paths:
+  /organizer/session:
+    post:
+      summary: Organizer sign-in with passcode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [passcode]
+              properties:
+                passcode: { type: string }
+      responses:
+        '204': { description: Signed in; sets pravaha_org cookie }
+        '400': { description: Invalid body, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '401': { description: Wrong passcode, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    delete:
+      summary: Organizer sign-out
+      responses:
+        '204': { description: Cookie cleared }
+  /upload-signature:
+    post:
+      summary: Create a lecture and sign its direct-to-Cloudinary upload
+      security: [{ organizerCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, rightsConfirmed]
+              properties:
+                title: { type: string, minLength: 1, maxLength: 140 }
+                speaker: { type: string, maxLength: 80 }
+                rightsConfirmed: { type: boolean, enum: [true] }
+      responses:
+        '200':
+          description: Signed upload parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lectureId: { type: string, format: uuid }
+                  signature: { type: string }
+                  timestamp: { type: integer }
+                  apiKey: { type: string }
+                  cloudName: { type: string }
+                  params: { type: object, additionalProperties: true }
+        '400': { description: Invalid body }
+        '401': { description: Not an organizer }
+  /webhooks/cloudinary:
+    post:
+      summary: Cloudinary notification (transcription complete/failed)
+      security: [{ cloudinarySignature: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Received (including unknown public_id / ignored kinds) }
+        '401': { description: Invalid or stale signature — no side effects }
+        '500': { description: DB write failed — Cloudinary retries }
+  /lectures:
+    get:
+      summary: List sessions (public+ready for learners; all for organizers)
+      responses:
+        '200':
+          description: Sessions
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Lecture' } }
+  /lectures/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      summary: One session (unlisted reachable by direct link)
+      responses:
+        '200': { description: Session, content: { application/json: { schema: { $ref: '#/components/schemas/Lecture' } } } }
+        '404': { description: Not found }
+    patch:
+      summary: Update visibility / title / speaker
+      security: [{ organizerCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                visibility: { type: string, enum: [public, unlisted] }
+                title: { type: string, minLength: 1, maxLength: 140 }
+                speaker: { type: string, maxLength: 80 }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Lecture' } } } }
+        '400': { description: Invalid body }
+        '401': { description: Not an organizer }
+        '404': { description: Not found }
+  /search:
+    get:
+      summary: Find — full-text search over spoken content
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, minLength: 2, maxLength: 200 } }
+        - { name: lectureId, in: query, required: false, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results: { type: array, items: { $ref: '#/components/schemas/SearchResult' } }
+        '400': { description: Invalid query }
+  /ask:
+    post:
+      summary: Ask — grounded answer with validated clip citations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question: { type: string, minLength: 3, maxLength: 300 }
+                lectureId: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Answer, refusal, or fallback
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [answered, not_found, fallback] }
+                  answer: { type: string, nullable: true }
+                  citations: { type: array, items: { $ref: '#/components/schemas/Citation' } }
+        '400': { description: Invalid body }
+        '429': { description: Rate limited (Retry-After header) }

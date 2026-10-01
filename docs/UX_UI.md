@@ -1,0 +1,51 @@
+# UX / UI — Pravaha
+
+Rule: make the intelligence visible, hide the machinery. Learners see answers, moments and clips — never asset IDs, webhooks or "add-ons."
+
+## Routes
+
+| Route | Who | Purpose |
+|---|---|---|
+| `/` | Everyone | Hero Ask bar + library grid |
+| `/search?q=` | Everyone | Ask answer on top, Find results below |
+| `/watch/[id]?t=` | Everyone (unlisted by link) | Player, chapters, transcript, share moment |
+| `/studio` | Organizer | Passcode → upload → manage sessions |
+
+## Home `/`
+
+- **Hero:** wordmark, "Ask your recordings. Watch the answer.", one large input ("Ask anything from the library…"), 3 example-question chips generated from the demo library topics.
+- **Library grid:** `g_auto` thumbnail, title, speaker, duration. Tap → Watch.
+- **Empty state:** "No sessions yet — Pravaha turns recorded talks into answers you can watch."
+
+## Search / Ask `/search?q=`
+
+- **Answer card** (top): skeleton with shimmering lines while Claude answers. Retrieved clip cards render **before** the answer arrives, so the page is never empty.
+- Answer text with citation chips `[1] [2]`; tapping a chip scrolls to and pulses its clip card.
+- **Citation / result card:** thumbnail at the moment, session title + speaker, timestamp chip `12:34`, quoted snippet (search terms bold), actions: ▶ Play (inline trimmed clip), **Open full session** (→ `/watch/id?t=`), **Share as Moment**.
+- **States:**
+  - `not_found`: "That isn't covered in this library yet." + Find results if any.
+  - `fallback`: "Here are the most relevant moments." (no generated text).
+  - `429`: "You've asked a lot — try again in a few minutes."
+  - No results at all: "Nothing said matches — try different words."
+
+## Watch `/watch/[id]`
+
+- Cloudinary Video Player full-width (mobile) / 2-column with transcript (desktop ≥ 1024 px).
+- Chapters on the seek bar; subtitles on by default.
+- **Transcript panel (P1):** segments with timestamps, current one highlighted, tap to seek, a search-in-session box.
+- **Share this moment** button → Moment sheet for the current segment.
+- `processing`: plays, with "Transcribing — search and chapters coming soon." `transcript_failed`: plays, "This session isn't searchable."
+
+## Moment Sheet
+
+Bottom sheet (mobile) / modal (desktop). Phone-shaped 9:16 frame playing the Moment; "Generating your clip…" until `canplay`. Buttons: **Share** (`navigator.share`), **Copy link**, **Open full session**.
+
+## Studio `/studio`
+
+- Not signed in → one passcode field.
+- **Upload card:** title, speaker (optional), checkbox "I have the right to record and publish this session, and its speakers agreed." Upload button disabled until checked. Real progress from the Upload Widget.
+- **Sessions list:** title, status badge (`Processing` / `Ready` / `Not searchable`), visibility toggle (`Unlisted` ↔ `Public`), open link. Polls every 5 s while anything is processing; a toast on `Ready`.
+
+## Loading & Error
+
+Skeletons, never bare spinners. 404 session → "This session isn't available." Every error has a next action.
