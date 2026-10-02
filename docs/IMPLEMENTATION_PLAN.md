@@ -53,7 +53,7 @@ Secrets scan · cold test on someone else's phone · Cloudinary feedback survey 
 
 | Person | Owns |
 |---|---|
-| A — "Pipeline" | 01, 03 (API side), 05, 06 (SQL), 08 (retrieval + Claude + validation) |
+| A — "Pipeline" | 01, 03 (API side), 05, 06 (SQL), 08 (retrieval + AI + validation) |
 | B — "Experience" | 02, 03 (Studio UI), 04, 07, 08 (Ask UI), 09 (mobile polish) |
 | C / D (if any) | Library content (Day 2), demo script + recording, README, screenshots, submission |
 
@@ -84,10 +84,10 @@ The core loop (Phases 01–09) is built and verified on real Cloudinary + Neon. 
 |---|---|---|---|
 | 11 | Gemini AI layer | Provider switch to Gemini, model fallback chain, Zod → JSON schema | ✅ done |
 | 12 | Answer Reels | Every answer becomes one video stitched from the cited moments across sessions (`fl_splice`) | ✅ done |
-| 13 | Study Packs | Summary, concepts, a quiz whose explanations play the clip, "Session in 60 seconds" reel | next |
-| 14 | Learner Insights | Knowledge gaps (unanswered questions → what to record next), most asked, most shared | |
+| 13 | Study Packs | Summary, concepts, a quiz whose explanations play the clip, "Session in 60 seconds" reel | ✅ done |
+| 14 | Learner Insights | Knowledge gaps (unanswered questions → what to record next), most asked, most shared | ✅ done |
 | 15 | Multilingual | Hindi subtitles (Cloudinary translate) + ask in Hindi, answer from English lectures | |
-| 16 | Share cards & deploy | Cloudinary OG images, branded Moment pages `/m/[id]`, Vercel production | |
+| 16 | Share cards & deploy | Cloudinary OG images, branded Moment pages `/m/[id]`, Vercel production | ✅ live at pravaha-cyan.vercel.app |
 | 17 | Launch | Real library, eval, e2e on production, README, demo, submission | |
 
 **PR policy (team lead, Oct 1):** a PR is opened only once a feature branch carries **at least 20 changed files**, so related phases ship together (`GIT_WORKFLOW.md`).

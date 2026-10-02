@@ -14,7 +14,7 @@ The bar: **"What happened to this session / this question?"** answerable from lo
 | `ingest.done` / `ingest.failed` | `lectureId`, `segments`, `ms` / `error` |
 | `ask.done` | `status` (answered / not_found / fallback), `retrieved`, `cited`, `dropped`, `ms` |
 | `ask.rate_limited` | `scope` (ip / global) |
-| `claude.error` | `kind` (timeout / schema / api), `ms` |
+| `ai.error` | `kind` (`unconfigured` or the error name), `message`, `ms` — Ask fell back to clips |
 
 Never logged: transcript text, questions verbatim (only length), IPs, secrets.
 
@@ -22,7 +22,7 @@ Never logged: transcript text, questions verbatim (only length), IPs, secrets.
 
 - Upload → `ready` time (from `upload.signed` → `ingest.done`)
 - Ask status mix — a rising `fallback` or `not_found` share means a broken prompt or retrieval
-- `dropped` citations per answer — how often Claude tried to cite something it wasn't given (should be ~0)
+- `dropped` citations per answer — how often the model tried to cite something it wasn't given (should be ~0)
 
 ## Error tracking, tracing, monitoring
 

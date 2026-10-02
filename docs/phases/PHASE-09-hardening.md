@@ -12,7 +12,7 @@ Phase 08.
 1. **Scenario table** — run every row of `TESTING.md` against the deployed URL; fix or consciously accept each.
 2. **Eval** — `pnpm eval:ask`; fill in `AI_EVALUATION.md`'s results table. If citation precision < 90 %, tune the prompt or retrieval size before polishing anything else.
 3. **Security walk** — `SECURITY.md` line by line against the code: `server-only` imports, cookie flags, webhook raw-body verification, `401`s, snippet escaping, rate limit returns `429`.
-4. **Failure states** — `transcript_failed` session, Claude down (`fallback`), no results, slow Moment generation, 404 session.
+4. **Failure states** — `transcript_failed` session, AI down (`fallback`), no results, slow Moment generation, 404 session.
 5. **Mobile pass** — every page at 360 px width; thumb-reachable Ask bar; Moment sheet on iOS Safari.
 6. **Playwright smoke** (`tests/e2e/smoke.spec.ts`) against `APP_URL`: home loads → search a known phrase → result opens watch page at the right `t` → Ask a known question → ≥1 citation card.
 7. **Lighthouse** on home + watch: fix anything red in accessibility.

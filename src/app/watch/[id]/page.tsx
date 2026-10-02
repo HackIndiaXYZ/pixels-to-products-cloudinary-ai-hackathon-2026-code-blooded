@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { z } from "zod";
 
 import { WatchView } from "@/components/WatchView";
 import { formatTime } from "@/lib/format";
 import { getLecture, getSegments } from "@/lib/lectures";
+import { posterTime, SHARE_CARD, shareCardUrl } from "@/lib/media";
 import { getStudyPack } from "@/lib/study-packs";
 
 type Props = {
@@ -12,13 +14,30 @@ type Props = {
   searchParams: Promise<{ t?: string }>;
 };
 
-async function load(id: string) {
-  return z.uuid().safeParse(id).success ? getLecture(id) : null;
-}
+// cache(): generateMetadata and the page share one query per request.
+const load = cache(async (id: string) => (z.uuid().safeParse(id).success ? getLecture(id) : null));
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const lecture = await load((await params).id);
-  return { title: lecture ? `${lecture.title} — Pravaha` : "Session not found — Pravaha" };
+  if (!lecture) return { title: "Session not found — Pravaha" };
+
+  const image = shareCardUrl(lecture.publicId, posterTime(lecture.durationS), {
+    title: lecture.title,
+    subtitle: [lecture.speaker, lecture.durationS ? formatTime(lecture.durationS) : null].filter(Boolean).join(" · "),
+  });
+  const listed = lecture.status === "ready" && lecture.visibility === "public";
+  return {
+    title: `${lecture.title} — Pravaha`,
+    robots: listed ? undefined : { index: false, follow: false },
+    openGraph: {
+      type: "video.other",
+      siteName: "Pravaha",
+      title: lecture.title,
+      url: `/watch/${lecture.id}`,
+      images: [{ url: image, ...SHARE_CARD, alt: lecture.title }],
+    },
+    twitter: { card: "summary_large_image", title: lecture.title, images: [image] },
+  };
 }
 
 export default async function WatchPage({ params, searchParams }: Props) {

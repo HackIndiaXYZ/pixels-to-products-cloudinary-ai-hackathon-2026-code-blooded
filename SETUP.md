@@ -64,9 +64,18 @@ Webhooks need a public URL. Rather than tunnelling, Pravaha deploys to Vercel on
 
 ## 7. Deploy — Vercel
 
-1. `vercel.com` → Add New Project → import the GitHub repo.
-2. Add every variable from `.env.local` (production values), with `APP_URL=https://<your-project>.vercel.app`.
-3. Deploy. Every PR gets its own preview deployment automatically.
+Dev scripts (`pnpm db:migrate`, `pnpm spike`, `pnpm e2e:local`) read `.env.local`, then `.env`; variables already set in your shell win.
+
+1. **Database ready:** `pnpm db:migrate` against the Neon database production will use (prints `migrations up to date` when nothing is pending).
+2. **Import:** `vercel.com` → Add New → Project → import `HackIndiaXYZ/pixels-to-products-cloudinary-ai-hackathon-2026-code-blooded`. Framework preset **Next.js**; leave build and install commands at their defaults (pnpm is picked up from `pnpm-lock.yaml` and `packageManager`). Function region (Settings → Functions): the one nearest your Neon region, e.g. Cleveland (`cle1`) for `us-east-2`, Washington, D.C. (`iad1`) for `us-east-1`.
+3. **Environment variables** (Production *and* Preview): every key in `.env.example` with production values. Store the secrets (`CLOUDINARY_API_SECRET`, `DATABASE_URL`, `GEMINI_API_KEY`, `ORGANIZER_PASSCODE`, `SESSION_SECRET`) as **Sensitive**. Vercel warns that `NEXT_PUBLIC_CLOUDINARY_API_KEY` will be exposed to the browser; that is intended (it is useless without the server-side secret, `docs/SECURITY.md`). Use a **fresh** `ORGANIZER_PASSCODE` (≥ 24 chars) and `SESSION_SECRET` (`openssl rand -base64 32`), not your local ones. Set `APP_URL` to the production URL Vercel shows for the project, e.g. `https://pravaha.vercel.app`, with no trailing slash. It is read at **build time** for Open Graph URLs, so changing it later needs a redeploy.
+4. **Deploy**, then open the URL: the home page should list the library.
+5. **Point Cloudinary at the live webhook:** `APP_URL=https://<your-project>.vercel.app pnpm spike` (no file argument) sets the `pravaha_signed` preset's `notification_url` to `<APP_URL>/api/webhooks/cloudinary` and prints the preset settings; check the URL in the output.
+6. **Prove ingest end to end, with no local tooling:** `/studio` on the live URL → upload a short clip → it turns **Ready** on its own (Vercel function logs show `webhook.received` → `ingest.done` → `study_pack.done`) → publish it.
+7. **Smoke-test production:** `APP_URL=https://<your-project>.vercel.app SMOKE_PHRASE="<phrase said in a session>" SMOKE_QUESTION="<question the library answers>" pnpm test:e2e` (first run: `pnpm exec playwright install chromium`).
+8. **Share preview:** paste a `/m/<segmentId>` link into WhatsApp or the [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/); the Cloudinary share card should appear.
+
+Every PR gets its own preview deployment automatically. Previews share the production database; the webhook only ever points at production.
 
 ## A Test Recording
 

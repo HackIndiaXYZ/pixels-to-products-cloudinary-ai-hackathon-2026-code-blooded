@@ -6,10 +6,18 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
+// Absolute base for Open Graph URLs (/m/…, /watch/…). Read directly rather than via env(), which
+// requires every server secret and so can't run at build time.
+const appUrl = process.env.APP_URL && URL.canParse(process.env.APP_URL) ? process.env.APP_URL : "http://localhost:3000";
+
+const description =
+  "Turn recorded lectures and talks into knowledge you can search, ask and share — every answer is a clip of the moment it was said.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(appUrl),
   title: "Pravaha — ask your recordings, watch the answer",
-  description:
-    "Turn recorded lectures and talks into knowledge you can search, ask and share — every answer is a clip of the moment it was said.",
+  description,
+  openGraph: { siteName: "Pravaha", type: "website", title: "Pravaha — ask your recordings, watch the answer", description },
 };
 
 export const viewport: Viewport = {

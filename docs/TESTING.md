@@ -14,6 +14,7 @@ Scope: the things that would embarrass the product in front of a judge or corrup
 | `study-pack.test.ts` | Study Packs are grounded: ungrounded concepts/questions dropped, malformed questions dropped, highlights deduped and ordered |
 | `media.test.ts` (reels) | Answer Reels: cross-session splice, timed labels, 5-clip / 90 s caps |
 | `segments.test.ts` (real fixture) | A real Cloudinary transcript segments into 8–15 s windows with chapters and word timings |
+| `media.test.ts` (share cards) | Open Graph cards: exact composition, no subtitle layer when absent, long titles truncated |
 | `highlight.test.ts` | Snippets are plain-text parts — `<script>` in a transcript stays inert |
 | `webhook-signature.test.ts` | Bad/missing/stale signature rejected before parsing |
 
@@ -40,7 +41,7 @@ Transcript quality on real accents; Moment playback on iOS Safari + Android Chro
 | Bad webhook signature / replay | `webhook-signature.test.ts` — no DB write |
 | Duplicate webhook delivery | Manual replay → same row count (delete-then-insert TX) |
 | Transcription failure | `transcript_failed` state, video still plays — manual |
-| Claude failure / timeout / bad JSON | `citations.test.ts` + manual with key removed → `fallback` |
+| AI failure / timeout / bad JSON | `citations.test.ts` + manual with key removed → `fallback` |
 | Hallucinated citation | `citations.test.ts` |
 | Question not in library | Eval set (3 questions) → `not_found` |
 | Rate limiting | Manual: 21 Asks in an hour → `429` |

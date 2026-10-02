@@ -14,6 +14,11 @@ const CAPTION_MAX_S = 1.8;
 const CAPTION_STYLE = "co_white,b_rgb:000000b3,w_660,c_fit";
 const VERTICAL_CROP = "c_fill,ar_9:16,w_720,g_auto"; // g_auto must sit in its own component, not with so_/eo_
 
+// Where a session's representative frame comes from: 10% in (past any title card), at most 30 s.
+export function posterTime(durationS: number | null | undefined): number {
+  return Math.min(30, (durationS ?? 50) * 0.1);
+}
+
 // A content-aware 16:9 frame at a moment: g_auto keeps the speaker/slide in frame instead of a blind centre crop.
 export function thumbUrl(publicId: string, atS: number, cloud = CLOUD): string {
   return `${base(cloud)}/so_${sec(atS)},c_fill,ar_16:9,w_640,g_auto/f_auto,q_auto/${publicId}.jpg`;
@@ -81,6 +86,31 @@ export function momentUrl(
 // so a learner's first Moment doesn't wait on it.
 export function trackingWarmupUrl(publicId: string, cloud = CLOUD): string {
   return [base(cloud), "so_0,eo_1", VERTICAL_CROP.replace("w_720", "w_90"), "q_auto", `${publicId}.mp4`].join("/");
+}
+
+export const SHARE_CARD = { width: 1200, height: 630 } as const;
+const CARD_TITLE_MAX = 90;
+
+// A designed Open Graph image as one URL: the g_auto frame at the moment, faded at the top and bottom
+// (the middle — usually the speaker — stays bright), the Pravaha mark, the title and a subtitle line.
+// WhatsApp, LinkedIn and Slack previews come straight from Cloudinary; no image service of our own.
+export function shareCardUrl(
+  publicId: string,
+  atS: number,
+  { title, subtitle }: { title: string; subtitle?: string | null },
+  cloud = CLOUD,
+): string {
+  const clipped = title.length > CARD_TITLE_MAX ? `${title.slice(0, CARD_TITLE_MAX - 1).trimEnd()}…` : title;
+  const parts = [
+    `so_${sec(atS)},c_fill,w_${SHARE_CARD.width},h_${SHARE_CARD.height},g_auto`,
+    "e_gradient_fade:symmetric_pad,y_-0.5,b_black",
+    `l_text:arial_30_bold:${encodeLayerText("Pravaha")},co_white,b_rgb:0f766e/fl_layer_apply,g_north_west,x_60,y_56`,
+    `l_text:arial_60_bold:${encodeLayerText(clipped)},co_white,w_1080,c_fit/fl_layer_apply,g_south_west,x_60,y_130`,
+  ];
+  if (subtitle) {
+    parts.push(`l_text:arial_34:${encodeLayerText(subtitle)},co_rgb:99f6e4/fl_layer_apply,g_south_west,x_60,y_70`);
+  }
+  return [base(cloud), ...parts, "f_jpg,q_auto", `${publicId}.jpg`].join("/");
 }
 
 // The same window in the original 16:9 framing — for inline playback of a citation.
