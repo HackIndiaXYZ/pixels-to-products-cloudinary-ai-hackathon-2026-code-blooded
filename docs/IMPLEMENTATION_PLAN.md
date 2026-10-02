@@ -87,7 +87,7 @@ The core loop (Phases 01–09) is built and verified on real Cloudinary + Neon. 
 | 13 | Study Packs | Summary, concepts, a quiz whose explanations play the clip, "Session in 60 seconds" reel | ✅ done |
 | 14 | Learner Insights | Knowledge gaps (unanswered questions → what to record next), most asked, most shared | ✅ done |
 | 15 | Multilingual | Hindi subtitles (Cloudinary translate) + ask in Hindi, answer from English lectures | |
-| 16 | Share cards & deploy | Cloudinary OG images, branded Moment pages `/m/[id]`, Vercel production | code ✅ · deploy next |
+| 16 | Share cards & deploy | Cloudinary OG images, branded Moment pages `/m/[id]`, Vercel production | ✅ live at pravaha-cyan.vercel.app |
 | 17 | Launch | Real library, eval, e2e on production, README, demo, submission | |
 
 **PR policy (team lead, Oct 1):** a PR is opened only once a feature branch carries **at least 20 changed files**, so related phases ship together (`GIT_WORKFLOW.md`).

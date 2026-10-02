@@ -13,6 +13,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/); versioning: [SemVer](ht
 - **Gemini AI layer** with a model fallback chain (Phase 11)
 - Core loop, Phases 01–09: Studio upload, Watch, webhook ingest, Find, Library, Moments, grounded Ask, hardening
 
+### Deployed
+- Production on Vercel at https://pravaha-cyan.vercel.app (functions in `cle1`, next to Neon `us-east-2`); Cloudinary notifications point at the live webhook
+
 ### Fixed
 - Dev scripts load `.env` when `.env.local` is absent
 - `openapi.yaml` covers every v3 endpoint; current-state docs describe Gemini and timed `l_text` captions

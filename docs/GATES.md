@@ -13,7 +13,7 @@ Status: **PASS**, **NEEDS WORK**, **BLOCKED**, or **NOT STARTED**. A blocked cri
 | 7 — Technical architecture | **PASS** | `TRD.md`, `ARCHITECTURE.md`, `DATABASE.md`, `API.md`, `CLOUDINARY.md` |
 | 8 — MVP | **PASS** | Phases 01–14 built and verified locally against real Cloudinary + Neon + Gemini; Phase 16 code done |
 | 9 — Testing | **NEEDS WORK** | Lint, typecheck, 55 unit tests and build green; eval and Playwright smoke need production and the real library |
-| 10 — Deployment | **NEXT** | Runbook in `SETUP.md` §7 (Phase 16) |
+| 10 — Deployment | **PASS** | Live at https://pravaha-cyan.vercel.app (Oct 2); one live Studio upload through the webhook still to run |
 | 11 — Demo | **NOT STARTED** | Script ready (`DEMO.md`); recorded Day 3 evening |
 | 12 — Submission | **NOT STARTED** | Day 4, `SUBMISSION_CHECKLIST.md` |
 

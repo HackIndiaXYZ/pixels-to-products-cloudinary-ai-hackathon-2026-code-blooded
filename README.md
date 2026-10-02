@@ -4,7 +4,7 @@ Hackathon team repository for Code Blooded - [hackindia-team:pixels-to-products-
 
 **Pixels to Products — Cloudinary AI Hackathon 2026 (HackIndia × Cloudinary) · PS-03 · Track 3: Your Media-Savvy Startup · Team Code Blooded**
 
-> Status: in active build (Oct 1–3). Live URL, demo video and screenshots land here in Phase 10.
+> **Live:** [pravaha-cyan.vercel.app](https://pravaha-cyan.vercel.app) · Status: in active build (Oct 1–3). Demo video and screenshots land here in Phase 17.
 
 ## The Problem
 
@@ -50,7 +50,7 @@ One Next.js app (frontend + API) on Vercel · Neon Postgres · Cloudinary · Gem
 
 ## How to Test It
 
-*(Live URL added in Phase 10.)* Learners need no login:
+On the live app, **[pravaha-cyan.vercel.app](https://pravaha-cyan.vercel.app)**. Learners need no login:
 1. Open the home page and tap an example question. You get an answer with citation chips.
 2. Tap a citation. The clip plays from the exact moment. Then **Open full session** or **Share as Moment**.
 3. Search a phrase. Results across sessions jump to the second.
